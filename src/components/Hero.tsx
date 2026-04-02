@@ -15,10 +15,10 @@ const Hero = () => {
       "Software Engineer",
       "Full Stack Developer",
     ],
-    typingSpeed: 50,
+    typingSpeed: 60,
     deletingSpeed: 30,
-    pauseBeforeDelete: 2000,
-    pauseBetweenTexts: 500,
+    pauseBeforeDelete: 500,
+    pauseBetweenTexts: 300,
   });
 
   useEffect(() => {
@@ -55,8 +55,9 @@ const Hero = () => {
         <div>
           <div className="hero-tag flex items-center gap-2 mb-4">
             <div className="w-8 h-0.5 bg-primary" />
-            <span className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">
-              {hero.tagline}
+            <span className="text-sm font-semibold uppercase tracking-[0.2em] text-primary flex items-center">
+              {displayText}
+              <span className={`ml-0.5 inline-block w-2 h-5 bg-primary transition-opacity duration-100 ${showCursor ? "opacity-100" : "opacity-0"}`} style={{ animation: showCursor ? "none" : "none" }} />
             </span>
           </div>
 
@@ -75,8 +76,7 @@ const Hero = () => {
           </h1>
 
           <p className="hero-subtitle text-lg text-muted-foreground max-w-lg mb-8 leading-relaxed">
-            <span className="font-semibold text-primary">{displayText}</span>
-            <span className={`ml-1 inline-block w-0.5 h-7 bg-primary align-text-bottom transition-opacity duration-200 ${showCursor ? "opacity-100" : "opacity-0"}`} />
+            {hero.subtitle}
           </p>
 
           <div className="hero-buttons flex flex-wrap gap-4 mb-8">
@@ -110,12 +110,12 @@ const Hero = () => {
         </div>
 
         {/* Right */}
-        <div className="hero-image flex justify-center lg:justify-end">
-          <div className="relative">
+        <div className="hero-image flex justify-center lg:justify-end items-start">
+          <div className="relative -mt-12">
             <img
-              src="/images/profile-pic.png"
+              src="/images/avatar.png"
               alt={hero.name}
-              className="relative w-64 h-64 md:w-80 md:h-80 rounded-full object-cover border-4 border-background shadow-2xl"
+              className="relative w-80 h-80 md:w-96 md:h-96 rounded-full object-cover border-4 border-background shadow-2xl"
               style={{ boxShadow: "var(--shadow-accent)" }}
             />
             {/* Status badge */}
