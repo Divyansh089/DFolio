@@ -2,11 +2,24 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { resumeData } from "../data/resumeData";
 import useBlockchainAnimation from "../hooks/useBlockchainAnimation";
+import { useTypingAnimation } from "../hooks/useTypingAnimation";
 
 const Hero = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
   useBlockchainAnimation(canvasRef);
+
+  const { displayText, showCursor } = useTypingAnimation({
+    texts: [
+      "Blockchain Developer",
+      "Software Engineer",
+      "Full Stack Developer",
+    ],
+    typingSpeed: 50,
+    deletingSpeed: 30,
+    pauseBeforeDelete: 2000,
+    pauseBetweenTexts: 500,
+  });
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -62,7 +75,8 @@ const Hero = () => {
           </h1>
 
           <p className="hero-subtitle text-lg text-muted-foreground max-w-lg mb-8 leading-relaxed">
-            {hero.subtitle}
+            <span className="font-semibold text-primary">{displayText}</span>
+            <span className={`ml-1 inline-block w-0.5 h-7 bg-primary align-text-bottom transition-opacity duration-200 ${showCursor ? "opacity-100" : "opacity-0"}`} />
           </p>
 
           <div className="hero-buttons flex flex-wrap gap-4 mb-8">
@@ -98,11 +112,8 @@ const Hero = () => {
         {/* Right */}
         <div className="hero-image flex justify-center lg:justify-end">
           <div className="relative">
-            {/* Decorative ring */}
-            <div className="absolute -inset-6 rounded-full border-2 border-dashed border-primary/15 animate-[spin_30s_linear_infinite]" />
-            <div className="absolute -inset-3 rounded-full bg-primary/8 blur-xl" />
             <img
-              src="/images/profile-pic.jpg"
+              src="/images/profile-pic.png"
               alt={hero.name}
               className="relative w-64 h-64 md:w-80 md:h-80 rounded-full object-cover border-4 border-background shadow-2xl"
               style={{ boxShadow: "var(--shadow-accent)" }}
