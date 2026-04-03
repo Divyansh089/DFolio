@@ -60,7 +60,7 @@ const Projects = () => {
                 </div>
                 <div className={`${isEven ? "lg:order-1" : ""}`}>
                   <img
-                    src="/images/work-desk.jpg"
+                    src="/images/work-desk.png"
                     alt={project.name}
                     className="rounded-2xl w-full hover:scale-105 transition-transform duration-500"
                     style={{ filter: filters[i] }}

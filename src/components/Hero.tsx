@@ -2,11 +2,24 @@ import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { resumeData } from "../data/resumeData";
 import useBlockchainAnimation from "../hooks/useBlockchainAnimation";
+import { useTypingAnimation } from "../hooks/useTypingAnimation";
 
 const Hero = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
   useBlockchainAnimation(canvasRef);
+
+  const { displayText, showCursor } = useTypingAnimation({
+    texts: [
+      "Blockchain Developer",
+      "Software Engineer",
+      "Full Stack Developer",
+    ],
+    typingSpeed: 60,
+    deletingSpeed: 30,
+    pauseBeforeDelete: 500,
+    pauseBetweenTexts: 300,
+  });
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -42,8 +55,9 @@ const Hero = () => {
         <div>
           <div className="hero-tag flex items-center gap-2 mb-4">
             <div className="w-8 h-0.5 bg-primary" />
-            <span className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">
-              {hero.tagline}
+            <span className="text-sm font-semibold uppercase tracking-[0.2em] text-primary flex items-center">
+              {displayText}
+              <span className={`ml-0.5 inline-block w-2 h-5 bg-primary transition-opacity duration-100 ${showCursor ? "opacity-100" : "opacity-0"}`} style={{ animation: showCursor ? "none" : "none" }} />
             </span>
           </div>
 
@@ -96,15 +110,12 @@ const Hero = () => {
         </div>
 
         {/* Right */}
-        <div className="hero-image flex justify-center lg:justify-end">
-          <div className="relative">
-            {/* Decorative ring */}
-            <div className="absolute -inset-6 rounded-full border-2 border-dashed border-primary/15 animate-[spin_30s_linear_infinite]" />
-            <div className="absolute -inset-3 rounded-full bg-primary/8 blur-xl" />
+        <div className="hero-image flex justify-center lg:justify-end items-start">
+          <div className="relative -mt-12">
             <img
-              src="/images/profile-pic.jpg"
+              src="/images/avatar.png"
               alt={hero.name}
-              className="relative w-64 h-64 md:w-80 md:h-80 rounded-full object-cover border-4 border-background shadow-2xl"
+              className="relative w-80 h-80 md:w-96 md:h-96 rounded-full object-cover border-4 border-background shadow-2xl"
               style={{ boxShadow: "var(--shadow-accent)" }}
             />
             {/* Status badge */}

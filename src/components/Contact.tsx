@@ -79,7 +79,7 @@ const Contact = () => {
         {/* Image */}
         <div className="contact-image flex justify-center lg:justify-end">
           <img
-            src="/images/young-boy.png"
+            src="/images/ch-2.png"
             alt="Contact"
             className="w-72 md:w-96"
           />
