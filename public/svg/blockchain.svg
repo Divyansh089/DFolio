@@ -1,0 +1,14 @@
+<svg width="110" height="110" viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true">
+    <rect x="6" y="38" width="28" height="28" rx="5" fill="#5b4fff" opacity="0.18" />
+    <rect x="41" y="18" width="28" height="28" rx="5" fill="#5b4fff" opacity="0.14" />
+    <rect x="76" y="38" width="28" height="28" rx="5" fill="#5b4fff" opacity="0.10" />
+    <rect x="41" y="60" width="28" height="28" rx="5" fill="#5b4fff" opacity="0.10" />
+    <line x1="34" y1="52" x2="41" y2="32" stroke="#5b4fff" stroke-width="1.5" opacity="0.25" />
+    <line x1="69" y1="32" x2="76" y2="52" stroke="#5b4fff" stroke-width="1.5" opacity="0.20" />
+    <line x1="69" y1="52" x2="76" y2="52" stroke="#5b4fff" stroke-width="1.5" opacity="0.18" />
+    <line x1="55" y1="46" x2="55" y2="60" stroke="#5b4fff" stroke-width="1.5" opacity="0.18" />
+    <circle cx="6" cy="38" r="3" fill="#5b4fff" opacity="0.30" />
+    <circle cx="41" cy="18" r="3" fill="#5b4fff" opacity="0.25" />
+    <circle cx="76" cy="38" r="3" fill="#5b4fff" opacity="0.20" />
+</svg>

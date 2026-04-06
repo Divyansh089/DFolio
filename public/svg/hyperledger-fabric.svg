@@ -1,0 +1,12 @@
+<svg width="110" height="110" viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg"
+    aria-hidden="true">
+    <polygon points="55,10 95,32 95,76 55,98 15,76 15,32" stroke="#5b4fff" stroke-width="1.5"
+        fill="none" opacity="0.18" />
+    <polygon points="55,24 81,38 81,70 55,84 29,70 29,38" stroke="#5b4fff" stroke-width="1.2"
+        fill="none" opacity="0.13" />
+    <polygon points="55,38 68,46 68,62 55,70 42,62 42,46" fill="#5b4fff" opacity="0.12" />
+    <circle cx="55" cy="54" r="5" fill="#5b4fff" opacity="0.30" />
+    <line x1="55" y1="10" x2="55" y2="38" stroke="#5b4fff" stroke-width="1" opacity="0.14" />
+    <line x1="95" y1="32" x2="68" y2="46" stroke="#5b4fff" stroke-width="1" opacity="0.10" />
+    <line x1="15" y1="32" x2="42" y2="46" stroke="#5b4fff" stroke-width="1" opacity="0.10" />
+</svg>
