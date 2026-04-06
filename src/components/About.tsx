@@ -56,22 +56,22 @@ const About = () => {
 
   return (
     <section id="about" ref={sectionRef} className="section-padding bg-muted/30">
-      <div className="section-container grid lg:grid-cols-2 gap-16 items-center">
+      <div className="section-container grid lg:grid-cols-12 gap-10 lg:gap-12 items-center">
         {/* Image */}
-        <div className="about-image flex justify-center">
-          <div className="relative">
+        <div className="about-image lg:col-span-5 flex justify-center lg:justify-start lg:-ml-8">
+          <div className="relative h-[420px] md:h-[480px] flex items-center">
             <div className="absolute -bottom-4 -right-4 w-full h-full rounded-2xl bg-primary/15" />
             <img
               src="/images/ch-8.png"
               alt="About Divyansh"
-              className="relative w-72 md:w-80 rounded-2xl"
+              className="relative w-80 md:w-[420px] rounded-2xl object-contain"
             />
           </div>
         </div>
 
         {/* Text */}
-        <div className="about-text">
-          <span className="section-label">About Me</span>
+        <div className="about-text lg:col-span-7">
+          <span className="section-label font-semibold">About Me</span>
           <h2 className="section-heading mb-6">
             Passionate Developer &<br />Blockchain Enthusiast
           </h2>
