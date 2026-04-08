@@ -5,6 +5,14 @@ import { resumeData } from "../data/resumeData";
 
 gsap.registerPlugin(ScrollTrigger);
 
+const certificatePdfMap: Record<string, string> = {
+  "Hyperledger Fabric Developer": "/certificate/hyperledger-fabric-fundamentals.pdf",
+  "Full-Stack Web Development": "/certificate/UC-Full-Stack.pdf",
+  "Advanced Blockchain": "/certificate/UC-Adv-BlockChain.pdf",
+  "Java (Basic)": "/certificate/java_basic%20certificate.pdf",
+  "Python (Basic)": "/certificate/python_basic%20certificate.pdf",
+};
+
 const Certifications = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
 
@@ -37,6 +45,7 @@ const Certifications = () => {
         <div className="space-y-16 max-w-5xl mx-auto">
           {resumeData.certifications.map((cert, i) => {
             const isEven = i % 2 !== 0;
+            const certificatePdf = certificatePdfMap[cert.name];
             const descriptions: Record<string, string> = {
               "Hyperledger Fabric Developer": "Enterprise blockchain development covering chaincode, endorsement policies, Fabric CA/PKI, Raft ordering service, SDKs, Docker and Kubernetes deployment.",
               "Full-Stack Web Development": "Comprehensive full-stack development with React, Node.js, REST APIs, and modern testing practices.",
@@ -79,19 +88,31 @@ const Certifications = () => {
 
                 {/* Certificate placeholder card */}
                 <div className={isEven ? "lg:order-1" : ""}>
-                  <div className="rounded-3xl border border-border bg-card h-64 flex flex-col items-center justify-center shadow-sm">
-                    <div className="w-14 h-14 mb-3 text-primary/30">
-                      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="12" y="8" width="40" height="48" rx="4" stroke="currentColor" strokeWidth="2" fill="currentColor" fillOpacity="0.08" />
-                        <path d="M22 24h20M22 32h14M22 40h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                        <path d="M38 44l4-4 4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        <circle cx="42" cy="48" r="6" stroke="currentColor" strokeWidth="2" fill="currentColor" fillOpacity="0.15" />
-                      </svg>
+                  {certificatePdf ? (
+                    <a
+                      href={certificatePdf}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative block h-64 overflow-hidden rounded-3xl border border-border bg-card shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/40"
+                    >
+                      <iframe
+                        src={`${certificatePdf}#toolbar=0&navpanes=0&scrollbar=0`}
+                        title={`${cert.name} certificate preview`}
+                        className="pointer-events-none h-full w-full"
+                      />
+                      <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-card via-card/80 to-transparent px-4 py-3">
+                        <span className="text-xs font-mono uppercase tracking-[0.18em] text-muted-foreground/80 transition-colors duration-300 group-hover:text-primary">
+                          Open Full Certificate
+                        </span>
+                      </div>
+                    </a>
+                  ) : (
+                    <div className="rounded-3xl border border-border bg-card h-64 flex flex-col items-center justify-center shadow-sm">
+                      <span className="text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground/50">
+                        Certificate Missing
+                      </span>
                     </div>
-                    <span className="text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground/50">
-                      Certificate Image
-                    </span>
-                  </div>
+                  )}
                 </div>
               </div>
             );
