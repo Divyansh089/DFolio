@@ -15,28 +15,37 @@ const skillArt: Record<string, string> = {
   "Hyperledger Fabric": "/svg/hyperledger-fabric.svg",
 };
 
-// Accent colours per card (matches hero purple palette, tinted variants)
 const cardAccents: Record<string, { cardBg: string; cardBorder: string; tagBg: string; tagText: string }> = {
-  Blockchain: { cardBg: "bg-[#f5f4ff]", cardBorder: "border-[#c5c2f7]", tagBg: "bg-[#ede9ff]", tagText: "text-[#3d3bdb]" },
-  Frontend: { cardBg: "bg-[#f0f4ff]", cardBorder: "border-[#bfcef7]", tagBg: "bg-[#e6ecff]", tagText: "text-[#2952cc]" },
-  Backend: { cardBg: "bg-[#f2f5ff]", cardBorder: "border-[#c2cbf5]", tagBg: "bg-[#eaedff]", tagText: "text-[#3342c9]" },
-  Languages: { cardBg: "bg-[#f7f5ff]", cardBorder: "border-[#cec8f8]", tagBg: "bg-[#efecff]", tagText: "text-[#4535d4]" },
-  "DevOps & Tools": { cardBg: "bg-[#f4f2ff]", cardBorder: "border-[#c9c4f6]", tagBg: "bg-[#edeaff]", tagText: "text-[#3d3bdb]" },
+  Blockchain:           { cardBg: "bg-[#f5f4ff]", cardBorder: "border-[#c5c2f7]", tagBg: "bg-[#ede9ff]", tagText: "text-[#3d3bdb]" },
+  Frontend:             { cardBg: "bg-[#f0f4ff]", cardBorder: "border-[#bfcef7]", tagBg: "bg-[#e6ecff]", tagText: "text-[#2952cc]" },
+  Backend:              { cardBg: "bg-[#f2f5ff]", cardBorder: "border-[#c2cbf5]", tagBg: "bg-[#eaedff]", tagText: "text-[#3342c9]" },
+  Languages:            { cardBg: "bg-[#f7f5ff]", cardBorder: "border-[#cec8f8]", tagBg: "bg-[#efecff]", tagText: "text-[#4535d4]" },
+  "DevOps & Tools":     { cardBg: "bg-[#f4f2ff]", cardBorder: "border-[#c9c4f6]", tagBg: "bg-[#edeaff]", tagText: "text-[#3d3bdb]" },
   "Hyperledger Fabric": { cardBg: "bg-[#f3f0ff]", cardBorder: "border-[#c8c1f7]", tagBg: "bg-[#ece8ff]", tagText: "text-[#4030cc]" },
 };
 
+// ── Carousel constants ────────────────────────────────────────────────────
+// CARD_W is the fixed pixel width of every card.
+// The track is wider (TRACK_W) so side-cards have space to slide into.
+// Side cards spread SPREAD px per step — must be less than CARD_W so they
+// stay behind the active card yet visibly peek out on each side.
+const CARD_W  = 520;   // px  — active card width
+const CARD_H  = 300;   // px  — card height
+const TRACK_W = 780;   // px  — stage width  (CARD_W + 2 × visible-peek margin)
+const SPREAD  = 130;   // px  — how far each step shifts left/right
+const DEPTH   = 80;    // px  — Z recession per step
+
 const Skills = () => {
-  const sectionRef   = useRef<HTMLDivElement>(null);
-  const headerRef    = useRef<HTMLDivElement>(null);
-  const avatarRef    = useRef<HTMLDivElement>(null);
-  const carouselRef  = useRef<HTMLDivElement>(null);
-  const [current, setCurrent]   = useState(0);
+  const sectionRef  = useRef<HTMLDivElement>(null);
+  const headerRef   = useRef<HTMLDivElement>(null);
+  const avatarRef   = useRef<HTMLDivElement>(null);
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const [current, setCurrent]     = useState(0);
   const [animating, setAnimating] = useState(false);
   const autoRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const skills = resumeData.skills;
   const total  = skills.length;
 
-  // ── section entrance animation ──────────────────────────────────────────
   useEffect(() => {
     if (!sectionRef.current) return;
     const ctx = gsap.context(() => {
@@ -56,7 +65,6 @@ const Skills = () => {
     return () => ctx.revert();
   }, []);
 
-  // ── auto-rotate ──────────────────────────────────────────────────────────
   const resetTimer = useCallback(() => {
     if (autoRef.current) clearInterval(autoRef.current);
     autoRef.current = setInterval(() => {
@@ -77,18 +85,50 @@ const Skills = () => {
     resetTimer();
   };
 
-  // Dynamic carousel positioning remains inline because transform/opacity are calculated per card.
+  /**
+   * Root cause of invisible side cards:
+   *
+   * Previously cards used `inset-0` which made each card as wide as the
+   * entire 70% column (~800-900 px on a 1440 screen). The active card
+   * completely covered all side cards even after they shifted left/right,
+   * because their translateX was smaller than half the card width.
+   *
+   * Fix: cards now have a FIXED width (CARD_W = 520px) and are positioned
+   * from the left edge of the track. The track itself is TRACK_W = 780px
+   * and centered under the header. Side cards shift by SPREAD (130px) per
+   * step — less than CARD_W/2 so they stay behind the active card, but
+   * enough to clearly peek out on either side.
+   */
   const getCardStyle = (idx: number): React.CSSProperties => {
-    const offset  = idx - current;
-    const wrapped = ((offset + total) % total) > total / 2
-      ? offset - total
-      : (((offset + total) % total) < total / 2 ? offset : offset);
-    const abs     = Math.abs(wrapped);
-    const visible = abs <= 2;
+    let offset = idx - current;
+    if (offset >  total / 2) offset -= total;
+    if (offset < -total / 2) offset += total;
+
+    const abs = Math.abs(offset);
+
+    if (abs > 2) {
+      return {
+        transform:     "translateX(0px) translateZ(-400px) scale(0.3)",
+        opacity:       0,
+        zIndex:        0,
+        pointerEvents: "none",
+        transition:    "none",
+      };
+    }
+
+    // Centre of track — cards start at left:0 and are nudged to centre
+    const centreOffset = (TRACK_W - CARD_W) / 2;   // 130px
+    const tx      = centreOffset + offset * SPREAD;
+    const tz      = -(abs * DEPTH);
+    const ry      = offset * 10;
+    const scale   = abs === 0 ? 1 : abs === 1 ? 0.85 : 0.70;
+    const opacity = abs === 0 ? 1 : abs === 1 ? 0.60 : 0.32;
+
     return {
-      transform:  `translateX(${wrapped * 62}px) translateZ(${-abs * 110}px) rotateY(${wrapped * 15}deg) scale(${abs === 0 ? 1 : abs === 1 ? 0.83 : 0.67})`,
-      opacity:    abs === 0 ? 1 : abs === 1 ? 0.52 : visible ? 0.22 : 0,
-      zIndex:     100 - abs,
+      transform:     `translateX(${tx}px) translateZ(${tz}px) rotateY(${ry}deg) scale(${scale})`,
+      opacity,
+      zIndex:        100 - abs,
+      pointerEvents: "auto",
     };
   };
 
@@ -99,51 +139,62 @@ const Skills = () => {
       className="section-padding bg-[#f5f5ff]"
     >
       <div className="section-container">
-        {/* ── 75 / 25 split ───────────────────────────────────────────── */}
-        <div className="grid min-h-[560px] grid-cols-[3fr_1fr] items-start gap-10">
 
-          {/* ── LEFT: header + carousel ───────────────────────────────── */}
+        <div className="grid min-h-[560px] grid-cols-[7fr_3fr] items-start gap-0">
+
+          {/* ── LEFT ──────────────────────────────────────────────────── */}
           <div ref={carouselRef} className="flex flex-col pt-2">
 
-            {/* header */}
             <div ref={headerRef} className="mb-[26px]">
               <span className="section-label font-semibold">Skills</span>
-              <h2 className="section-heading mb-0">
-                My Technical Toolkit
-              </h2>
+              <h2 className="section-heading mb-0">My Technical Toolkit</h2>
             </div>
 
-            {/* 3D carousel stage */}
-            <div className="w-full [perspective:900px]">
-              <div className="relative h-[290px] [transform-style:preserve-3d]">
+            {/*
+              Perspective wrapper — overflow:visible so peeking cards aren't clipped.
+              The inner track has a fixed pixel width & height.
+              Cards are positioned absolute from left:0 inside the track,
+              then shifted right by centreOffset so the active card sits
+              in the middle of the track.
+            */}
+            <div className="overflow-visible [perspective:1000px]">
+              <div
+                className="relative overflow-visible [transform-style:preserve-3d]"
+                style={{ width: TRACK_W, height: CARD_H + 20 }}
+              >
                 {skills.map((skill, idx) => {
-                  const accent = cardAccents[skill.name] ?? cardAccents["Blockchain"];
-                  const art    = skillArt[skill.name];
+                  const accent   = cardAccents[skill.name] ?? cardAccents["Blockchain"];
+                  const art      = skillArt[skill.name];
                   const isActive = idx === current;
+
                   return (
                     <div
                       key={skill.name}
                       className={cn(
-                        "absolute inset-0 flex min-h-[250px] h-full w-full flex-col justify-between overflow-hidden rounded-[20px] border p-[26px_24px] transition-all duration-[520ms] [transition-timing-function:cubic-bezier(0.4,0,0.2,1)]",
+                        // Fixed size — NOT inset-0
+                        "absolute top-0 left-0 flex flex-col justify-between",
+                        "overflow-hidden rounded-[20px] border p-[26px_24px]",
+                        "transition-[transform,opacity] duration-[520ms]",
+                        "[transition-timing-function:cubic-bezier(0.4,0,0.2,1)]",
                         isActive ? "cursor-default" : "cursor-pointer",
                         accent.cardBg,
                         accent.cardBorder,
                       )}
-                      style={getCardStyle(idx)}
+                      style={{
+                        ...getCardStyle(idx),
+                        width:  CARD_W,
+                        height: CARD_H,
+                      }}
                       onClick={() => !isActive && goTo(idx)}
                     >
-                      {/* background art */}
                       {art && (
                         <div className="pointer-events-none absolute -bottom-1 -right-1 select-none">
                           <img src={art} alt="" className="h-[110px] w-[110px]" draggable={false} />
                         </div>
                       )}
 
-                      {/* content */}
                       <div className="relative z-[1]">
-                        <div className="mb-1.5 text-[28px] leading-none">
-                          {skill.icon}
-                        </div>
+                        <div className="mb-1.5 text-[28px] leading-none">{skill.icon}</div>
                         <h3 className="m-0 text-[17px] font-bold text-[#1a1a2e] [font-family:var(--font-display,inherit)]">
                           {skill.name}
                         </h3>
@@ -152,7 +203,6 @@ const Skills = () => {
                         </p>
                       </div>
 
-                      {/* tags */}
                       <div className="relative z-[1] flex flex-wrap gap-1.5">
                         {skill.tags.map((tag: string) => (
                           <span
@@ -174,45 +224,36 @@ const Skills = () => {
               </div>
             </div>
 
-            {/* dots */}
-            <div className="mt-5 flex items-center gap-[7px]">
+            {/* dot indicators */}
+            <div className="mt-6 flex w-full items-center justify-center gap-[7px]">
               {skills.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => goTo(i)}
                   aria-label={`Go to skill ${i + 1}`}
                   className={cn(
-                    "cursor-pointer rounded border-0 p-0 transition-all duration-300 h-[7px]",
-                    i === current ? "w-[22px] bg-[#5b4fff]" : "w-[7px] bg-[#c5c2f7]",
+                    "h-[10px] cursor-pointer rounded border-0 p-0 transition-all duration-300",
+                    i === current ? "w-[30px] bg-[#5b4fff]" : "w-[10px] bg-[#c5c2f7]",
                   )}
                 />
               ))}
-
-              {/* prev / next */}
-              <div className="ml-auto flex gap-2">
-                {(["←", "→"] as const).map((arrow, di) => (
-                  <button
-                    key={arrow}
-                    onClick={() => goTo(current + (di === 0 ? -1 : 1))}
-                    className="flex h-[34px] w-[34px] cursor-pointer items-center justify-center rounded-[10px] border border-[#c5c2f7] bg-white text-[15px] text-[#5b4fff] transition-colors duration-200 hover:bg-[#ede9ff]"
-                  >
-                    {arrow}
-                  </button>
-                ))}
-              </div>
             </div>
           </div>
 
-          {/* ── RIGHT: avatar (25%) ───────────────────────────────────── */}
+          {/* ── RIGHT: avatar ─────────────────────────────────────────── */}
           <div
             ref={avatarRef}
-            className="flex h-full min-h-[380px] items-center justify-center"
+            className="flex h-full min-h-[480px] items-end justify-end"
           >
             <img
               src="/images/ch-3.png"
               alt="Divyansh avatar"
               draggable={false}
-              className="w-full max-w-[290px] select-none drop-shadow-[0_8px_32px_rgba(91,79,255,0.18)]"
+              className={cn(
+                "h-auto w-full select-none -mb-8",
+                "max-w-[320px] lg:max-w-[380px] xl:max-w-[420px]",
+                "drop-shadow-[0_8px_40px_rgba(91,79,255,0.22)]",
+              )}
             />
           </div>
 
