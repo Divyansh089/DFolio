@@ -85,20 +85,7 @@ const Skills = () => {
     resetTimer();
   };
 
-  /**
-   * Root cause of invisible side cards:
-   *
-   * Previously cards used `inset-0` which made each card as wide as the
-   * entire 70% column (~800-900 px on a 1440 screen). The active card
-   * completely covered all side cards even after they shifted left/right,
-   * because their translateX was smaller than half the card width.
-   *
-   * Fix: cards now have a FIXED width (CARD_W = 520px) and are positioned
-   * from the left edge of the track. The track itself is TRACK_W = 780px
-   * and centered under the header. Side cards shift by SPREAD (130px) per
-   * step — less than CARD_W/2 so they stay behind the active card, but
-   * enough to clearly peek out on either side.
-   */
+
   const getCardStyle = (idx: number): React.CSSProperties => {
     let offset = idx - current;
     if (offset >  total / 2) offset -= total;
