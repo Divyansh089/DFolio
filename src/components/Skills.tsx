@@ -40,6 +40,7 @@ const Skills = () => {
   const headerRef   = useRef<HTMLDivElement>(null);
   const avatarRef   = useRef<HTMLDivElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
+  const trackRef    = useRef<HTMLDivElement>(null);
   const [current, setCurrent]     = useState(0);
   const [animating, setAnimating] = useState(false);
   const autoRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -61,6 +62,43 @@ const Skills = () => {
         x: -30, opacity: 0, duration: 0.8, delay: 0.1, ease: "power3.out",
         scrollTrigger: { trigger: sectionRef.current, start: "top 85%" },
       });
+
+      // Scroll-linked motion so the section feels alive while user scrolls.
+      if (trackRef.current) {
+        gsap.fromTo(
+          trackRef.current,
+          { y: 36, opacity: 0.7, scale: 0.97 },
+          {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            ease: "none",
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top 88%",
+              end: "top 35%",
+              scrub: 1,
+            },
+          },
+        );
+      }
+
+      if (avatarRef.current) {
+        gsap.fromTo(
+          avatarRef.current,
+          { y: 48 },
+          {
+            y: -20,
+            ease: "none",
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: "top 90%",
+              end: "bottom 30%",
+              scrub: 1.2,
+            },
+          },
+        );
+      }
     }, sectionRef);
     return () => ctx.revert();
   }, []);
@@ -85,20 +123,7 @@ const Skills = () => {
     resetTimer();
   };
 
-  /**
-   * Root cause of invisible side cards:
-   *
-   * Previously cards used `inset-0` which made each card as wide as the
-   * entire 70% column (~800-900 px on a 1440 screen). The active card
-   * completely covered all side cards even after they shifted left/right,
-   * because their translateX was smaller than half the card width.
-   *
-   * Fix: cards now have a FIXED width (CARD_W = 520px) and are positioned
-   * from the left edge of the track. The track itself is TRACK_W = 780px
-   * and centered under the header. Side cards shift by SPREAD (130px) per
-   * step — less than CARD_W/2 so they stay behind the active card, but
-   * enough to clearly peek out on either side.
-   */
+
   const getCardStyle = (idx: number): React.CSSProperties => {
     let offset = idx - current;
     if (offset >  total / 2) offset -= total;
@@ -157,7 +182,7 @@ const Skills = () => {
               then shifted right by centreOffset so the active card sits
               in the middle of the track.
             */}
-            <div className="overflow-visible [perspective:1000px]">
+            <div ref={trackRef} className="overflow-visible [perspective:1000px]">
               <div
                 className="relative overflow-visible [transform-style:preserve-3d]"
                 style={{ width: TRACK_W, height: CARD_H + 20 }}
@@ -252,7 +277,7 @@ const Skills = () => {
               className={cn(
                 "h-auto w-full select-none -mb-8",
                 "max-w-[320px] lg:max-w-[380px] xl:max-w-[420px]",
-                "drop-shadow-[0_8px_40px_rgba(91,79,255,0.22)]",
+                "drop-shadow-[0_14px_60px_rgba(91,79,255,0.38)]",
               )}
             />
           </div>

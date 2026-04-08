@@ -156,7 +156,7 @@ export const resumeData: ResumeData = {
   contact: {
     email: "pateldivyansh131@gmail.com",
     phone: "+91-7906941751",
-    location: "Bareilly, Uttar Pradesh, India",
+    location: "Mathura, Uttar Pradesh, India",
     github: "https://github.com/Divyansh089",
     linkedin: "https://linkedin.com/in/divyansh-patel",
   },
