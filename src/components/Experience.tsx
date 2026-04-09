@@ -48,8 +48,10 @@ const Experience = () => {
 
           {resumeData.experience.map((exp, i) => {
             const isLeft = i % 2 === 0;
+            const isInternship = exp.role.toLowerCase().includes("intern");
+            
             return (
-              <div key={i} className={`relative mb-12 lg:grid lg:grid-cols-2 lg:gap-12`}>
+              <div key={i} className={`relative mb-12 ${isInternship ? "lg:grid lg:grid-cols-2 lg:gap-12" : "lg:grid lg:grid-cols-2 lg:gap-12"}`}>
                 {/* Dot */}
                 <div className="hidden lg:flex absolute left-1/2 -translate-x-1/2 top-6 z-10">
                   <div className="timeline-dot timeline-dot-pulse" />
@@ -72,6 +74,29 @@ const Experience = () => {
                     </ul>
                   </div>
                 </div>
+
+                {/* Certificate Display for Internship */}
+                {isInternship && (
+                  <div className={`lg:col-span-1 ${isLeft ? "lg:col-start-2" : "lg:col-start-1"}`}>
+                    <a
+                      href="/certificate/CertificateUnifiedMentor.pdf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative block h-80 overflow-hidden rounded-3xl border border-border bg-card shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/40"
+                    >
+                      <iframe
+                        src="/certificate/CertificateUnifiedMentor.pdf#toolbar=0&navpanes=0&scrollbar=0"
+                        title="Internship Certificate preview"
+                        className="pointer-events-none h-full w-full"
+                      />
+                      <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-card via-card/80 to-transparent px-4 py-3">
+                        <span className="text-xs font-mono uppercase tracking-[0.18em] text-muted-foreground/80 transition-colors duration-300 group-hover:text-primary">
+                          Open Full Certificate
+                        </span>
+                      </div>
+                    </a>
+                  </div>
+                )}
               </div>
             );
           })}
