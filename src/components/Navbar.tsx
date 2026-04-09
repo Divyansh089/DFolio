@@ -47,9 +47,9 @@ const Navbar = () => {
             <a
               key={link.href}
               href={link.href}
-              className={`text-sm font-medium transition-colors duration-200 ${
+              className={`relative text-sm font-medium transition-colors duration-200 after:absolute after:left-0 after:-bottom-1 after:h-0.5 after:w-full after:origin-left after:scale-x-0 after:bg-primary after:transition-transform after:duration-300 after:content-[''] hover:after:scale-x-100 ${
                 activeSection === link.href.replace("#", "")
-                  ? "text-primary"
+                  ? "text-primary after:scale-x-100"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >

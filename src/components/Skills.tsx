@@ -161,7 +161,7 @@ const Skills = () => {
     <section
       id="skills"
       ref={sectionRef}
-      className="section-padding bg-[#f5f5ff]"
+      className="section-padding bg-secondary/50"
     >
       <div className="section-container">
 
