@@ -24,7 +24,15 @@ const Projects = () => {
     return () => ctx.revert();
   }, []);
 
-  const filters = ["brightness(1.05)", "contrast(1.1) saturate(1.2)", "hue-rotate(20deg) brightness(1.05)"];
+  // Map project images with custom assignments
+  const getProjectImage = (index: number): string => {
+    const imageMap: { [key: number]: number } = {
+      0: 2,  // Project 1 → pro-2.png
+      1: 1,  // Project 2 → pro-1.png
+      2: 3,  // Project 3 → pro-3.png
+    };
+    return `/images/pro-${imageMap[index]}.png`;
+  };
 
   return (
     <section id="projects" ref={sectionRef} className="section-padding bg-muted/30">
@@ -77,10 +85,9 @@ const Projects = () => {
                 </div>
                 <div className={`${isEven ? "lg:order-1" : ""}`}>
                   <img
-                    src="/images/work-desk.png"
+                    src={getProjectImage(i)}
                     alt={project.name}
                     className="rounded-2xl w-full hover:scale-105 transition-transform duration-500"
-                    style={{ filter: filters[i] }}
                   />
                 </div>
               </div>
