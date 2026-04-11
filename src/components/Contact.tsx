@@ -1,12 +1,27 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { resumeData } from "../data/resumeData";
 
 gsap.registerPlugin(ScrollTrigger);
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
 const Contact = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const [location, setLocation] = useState("");
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+
+  // Email verification states
+  const [email, setEmail] = useState("");
+  const [isOTPSent, setIsOTPSent] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [isVerified, setIsVerified] = useState(false);
+  const [isLoadingOTP, setIsLoadingOTP] = useState(false);
+  const [otpError, setOtpError] = useState("");
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [canResend, setCanResend] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -27,6 +42,152 @@ const Contact = () => {
     }, sectionRef);
     return () => ctx.revert();
   }, []);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
+
+  const handleLocationClick = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      return;
+    }
+
+    setIsLoadingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        try {
+          // Use reverse geocoding to get city/location name
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+          );
+          const data = await response.json();
+          const locationName = data.address?.city || data.address?.town || data.address?.county || `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+          setLocation(locationName);
+        } catch (error) {
+          // Fallback to coordinates if reverse geocoding fails
+          setLocation(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+        } finally {
+          setIsLoadingLocation(false);
+        }
+      },
+      (error) => {
+        setIsLoadingLocation(false);
+        if (error.code === error.PERMISSION_DENIED) {
+          alert("Location access denied. Please enter your location manually.");
+        } else if (error.code === error.POSITION_UNAVAILABLE) {
+          alert("Location information is unavailable. Please enter manually.");
+        } else if (error.code === error.TIMEOUT) {
+          alert("Location request timed out. Please enter manually.");
+        }
+      }
+    );
+  };
+
+  // Send OTP to email
+  const handleSendOTP = async () => {
+    if (!email || !email.includes("@")) {
+      setOtpError("Please enter a valid email address");
+      return;
+    }
+
+    setIsLoadingOTP(true);
+    setOtpError("");
+
+    try {
+      const response = await fetch(`${API_URL}/send-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, userName: "Friend" }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setIsOTPSent(true);
+        setTimeLeft(Math.floor((result.expiryTime || 120000) / 1000));
+        setCanResend(false);
+        startTimer(Math.floor((result.expiryTime || 120000) / 1000));
+      } else {
+        setOtpError(result.message);
+      }
+    } catch (error) {
+      setOtpError("Failed to send OTP. Please try again.");
+      console.error("Error sending OTP:", error);
+    } finally {
+      setIsLoadingOTP(false);
+    }
+  };
+
+  // Start countdown timer
+  const startTimer = (seconds: number) => {
+    if (timerRef.current) clearInterval(timerRef.current);
+
+    let remaining = seconds;
+    timerRef.current = setInterval(() => {
+      remaining -= 1;
+      setTimeLeft(remaining);
+
+      if (remaining <= 0) {
+        if (timerRef.current) clearInterval(timerRef.current);
+        setCanResend(true);
+        setIsOTPSent(false);
+      }
+    }, 1000);
+  };
+
+  // Verify OTP (Unused - auto-verification handles this, but kept for reference)
+  const handleVerifyOTP = async () => {
+    if (!otp || otp.length !== 4) {
+      setOtpError("Please enter a 4-digit OTP");
+      return;
+    }
+
+    await verifyOTPFromAPI(email, otp);
+  };
+
+  // Format time display (mm:ss)
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+
+  // Verify OTP from API
+  const verifyOTPFromAPI = async (userEmail: string, userOtp: string) => {
+    setIsLoadingOTP(true);
+
+    try {
+      const response = await fetch(`${API_URL}/verify-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: userEmail, otp: userOtp }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setIsVerified(true);
+        setOtpError("");
+        if (timerRef.current) clearInterval(timerRef.current);
+        setTimeLeft(0);
+        setOtp("");
+      } else {
+        setOtpError(result.message);
+        setOtp("");
+      }
+    } catch (error) {
+      setOtpError("Verification failed. Please try again.");
+      console.error("Error verifying OTP:", error);
+      setOtp("");
+    } finally {
+      setIsLoadingOTP(false);
+    }
+  };
 
   const { contact } = resumeData;
 
@@ -75,23 +236,134 @@ const Contact = () => {
           </div>
 
           <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
-            <input
-              type="text"
-              placeholder="Your Name"
-              className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-            />
-            <input
-              type="email"
-              placeholder="Your Email"
-              className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <input
+                type="text"
+                placeholder="Your Name"
+                className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+              <input
+                type="text"
+                placeholder="Your Location"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                onFocus={handleLocationClick}
+                readOnly={isLoadingLocation}
+                className={`w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 ${
+                  isLoadingLocation ? "cursor-wait opacity-75" : "cursor-text"
+                }`}
+                title={isLoadingLocation ? "Fetching your location..." : "Click to get your location, or type manually"}
+              />
+            </div>
+
+            {/* Email Verification Section */}
+            <div className="space-y-3">
+              <div className="flex gap-2">
+                <input
+                  type="email"
+                  placeholder="Your Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isVerified}
+                  className={`flex-1 px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 ${
+                    isVerified
+                      ? "bg-primary/5 border-green-500 text-green-700"
+                      : "focus:ring-primary/30"
+                  } ${otpError && !isOTPSent ? "border-red-500" : ""}`}
+                />
+              <button
+                type="button"
+                onClick={handleSendOTP}
+                disabled={isLoadingOTP || isVerified || canResend === false && isOTPSent}
+                className={`px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${
+                  isVerified
+                    ? "bg-green-500 text-white cursor-not-allowed opacity-100 hover:brightness-110"
+                    : canResend
+                    ? "bg-primary text-primary-foreground hover:-translate-y-0.5 hover:brightness-110"
+                    : isOTPSent
+                    ? "bg-primary/60 text-primary-foreground cursor-not-allowed opacity-60"
+                    : "bg-primary text-primary-foreground hover:-translate-y-0.5 hover:brightness-110"
+                }`}
+              >
+                {isVerified ? (
+                  <span className="flex items-center gap-2">
+                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
+                    </svg>
+                    Verified
+                  </span>
+                ) : isLoadingOTP ? (
+                  "Sending..."
+                ) : canResend ? (
+                  "Resend"
+                ) : (
+                  "Verify"
+                )}
+              </button>
+              </div>
+
+              {otpError && !isOTPSent && (
+                <p className="text-xs text-red-500">{otpError}</p>
+              )}
+            </div>
+
+            {/* OTP Input Section */}
+            {isOTPSent && !isVerified && (
+              <div className="flex gap-4 items-start">
+                <input
+                  type="text"
+                  placeholder="Enter OTP"
+                  value={otp}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, "").slice(0, 4);
+                    setOtp(val);
+                    setOtpError(""); // Clear error on input change
+                    
+                    // Auto-verify when 4 digits are entered
+                    if (val.length === 4) {
+                      verifyOTPFromAPI(email, val);
+                    }
+                  }}
+                  disabled={isLoadingOTP}
+                  maxLength={4}
+                  className={`flex-1 px-4 py-3 rounded-xl border text-center text-lg font-semibold tracking-widest bg-background focus:outline-none transition-all ${
+                    otpError
+                      ? "border-red-500 bg-red-50/50 text-red-700"
+                      : "border-border focus:ring-2 focus:ring-primary/30"
+                  }`}
+                />
+                <div className="text-right pt-3 min-w-12">
+                  {timeLeft > 0 ? (
+                    <div className="text-sm font-semibold text-primary">
+                      {formatTime(timeLeft)}
+                    </div>
+                  ) : (
+                    <div className="text-xs text-red-500 font-semibold">
+                      Expired
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {otpError && isOTPSent && !isVerified && (
+              <p className="text-xs text-red-500">{otpError}</p>
+            )}
+
             <textarea
               placeholder="Your Message"
               rows={4}
-              className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+              disabled={!isVerified}
+              className={`w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none ${
+                !isVerified ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             />
-            <button type="submit" className="btn-primary w-full">
-              Send Message
+            <button
+              type="submit"
+              disabled={!isVerified}
+              className={`btn-primary w-full ${!isVerified ? "opacity-50 cursor-not-allowed" : ""}`}
+            >
+              {isVerified ? "Send Message" : "Verify Email First"}
             </button>
           </form>
         </div>
