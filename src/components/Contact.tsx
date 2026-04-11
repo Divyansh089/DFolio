@@ -11,6 +11,8 @@ const Contact = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const [location, setLocation] = useState("");
   const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const [locationError, setLocationError] = useState("");
+  const [isLocationInputOpen, setIsLocationInputOpen] = useState(false);
 
   // Email verification states
   const [email, setEmail] = useState("");
@@ -52,7 +54,7 @@ const Contact = () => {
 
   const handleLocationClick = () => {
     if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser");
+      setIsLocationInputOpen(true);
       return;
     }
 
@@ -68,22 +70,20 @@ const Contact = () => {
           const data = await response.json();
           const locationName = data.address?.city || data.address?.town || data.address?.county || `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
           setLocation(locationName);
+          setLocationError("");
+          setIsLocationInputOpen(false);
         } catch (error) {
           // Fallback to coordinates if reverse geocoding fails
           setLocation(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
+          setLocationError("");
+          setIsLocationInputOpen(false);
         } finally {
           setIsLoadingLocation(false);
         }
       },
       (error) => {
         setIsLoadingLocation(false);
-        if (error.code === error.PERMISSION_DENIED) {
-          alert("Location access denied. Please enter your location manually.");
-        } else if (error.code === error.POSITION_UNAVAILABLE) {
-          alert("Location information is unavailable. Please enter manually.");
-        } else if (error.code === error.TIMEOUT) {
-          alert("Location request timed out. Please enter manually.");
-        }
+        setIsLocationInputOpen(true);
       }
     );
   };
@@ -242,18 +242,20 @@ const Contact = () => {
                 placeholder="Your Name"
                 className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
-              <input
-                type="text"
-                placeholder="Your Location"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                onFocus={handleLocationClick}
-                readOnly={isLoadingLocation}
-                className={`w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 ${
-                  isLoadingLocation ? "cursor-wait opacity-75" : "cursor-text"
-                }`}
-                title={isLoadingLocation ? "Fetching your location..." : "Click to get your location, or type manually"}
-              />
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Your Location"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  onFocus={!location ? handleLocationClick : undefined}
+                  readOnly={isLoadingLocation && !isLocationInputOpen}
+                  className={`w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 ${
+                    isLoadingLocation && !isLocationInputOpen ? "cursor-wait opacity-75" : ""
+                  }`}
+                  title={isLoadingLocation ? "Fetching your location..." : "Click to get your location, or type manually"}
+                />
+              </div>
             </div>
 
             {/* Email Verification Section */}
