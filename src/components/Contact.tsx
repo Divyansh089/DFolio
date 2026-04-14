@@ -25,6 +25,13 @@ const Contact = () => {
   const [canResend, setCanResend] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Contact form states
+  const [name, setName] = useState("");
+  const [message, setMessage] = useState("");
+  const [isLoadingMessage, setIsLoadingMessage] = useState(false);
+  const [messageError, setMessageError] = useState("");
+  const [messageSuccess, setMessageSuccess] = useState("");
+
   useEffect(() => {
     const ctx = gsap.context(() => {
       gsap.from(".contact-form", {
@@ -189,6 +196,52 @@ const Contact = () => {
     }
   };
 
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!message.trim()) {
+      setMessageError("Please enter a message");
+      return;
+    }
+
+    setIsLoadingMessage(true);
+    setMessageError("");
+    setMessageSuccess("");
+
+    try {
+      const response = await fetch(`${API_URL}/send-contact-message`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          email,
+          location,
+          message,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setMessageSuccess("Message sent successfully! Thank you for reaching out.");
+        setMessage("");
+        setName("");
+        setLocation("");
+        setEmail("");
+        setIsVerified(false);
+        // Clear success message after 5 seconds
+        setTimeout(() => setMessageSuccess(""), 5000);
+      } else {
+        setMessageError(result.message || "Failed to send message");
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+      setMessageError("Failed to send message. Please try again.");
+    } finally {
+      setIsLoadingMessage(false);
+    }
+  };
+
   const { contact } = resumeData;
 
   return (
@@ -235,11 +288,13 @@ const Contact = () => {
             </div>
           </div>
 
-          <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+          <form className="space-y-4" onSubmit={handleSendMessage}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <input
                 type="text"
                 placeholder="Your Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
               <div className="relative">
@@ -355,17 +410,31 @@ const Contact = () => {
             <textarea
               placeholder="Your Message"
               rows={4}
-              disabled={!isVerified}
-              className={`w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none ${
-                !isVerified ? "opacity-50 cursor-not-allowed" : ""
-              }`}
+              value={message}
+              onChange={(e) => {
+                setMessage(e.target.value);
+                setMessageError(""); // Clear error on input change
+              }}
+              className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
             />
+            {messageError && (
+              <p className="text-xs text-red-500">{messageError}</p>
+            )}
+            {messageSuccess && (
+              <p className="text-xs text-green-500">{messageSuccess}</p>
+            )}
             <button
               type="submit"
-              disabled={!isVerified}
-              className={`btn-primary w-full ${!isVerified ? "opacity-50 cursor-not-allowed" : ""}`}
+              disabled={!isVerified || isLoadingMessage}
+              className={`btn-primary w-full ${
+                !isVerified || isLoadingMessage ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             >
-              {isVerified ? "Send Message" : "Verify Email First"}
+              {!isVerified
+                ? "Verify Email First"
+                : isLoadingMessage
+                ? "Sending..."
+                : "Send Message"}
             </button>
           </form>
         </div>

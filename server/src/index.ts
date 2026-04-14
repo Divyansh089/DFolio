@@ -20,41 +20,51 @@ if (result.error) {
 
 // Initialize app after env vars are loaded
 (async () => {
-  const { sendOTPEmail, verifyOTPEmail } = await import("./routes/otpRoutes.js");
+  try {
+    const { sendOTPEmail, verifyOTPEmail } = await import("./routes/otpRoutes.js");
+    const { sendContactMessage } = await import("./routes/messageRoute.js");
 
-  const app = express();
-  const PORT = process.env.SERVER_PORT || process.env.VITE_SERVER_PORT || 5000;
-  const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:8080";
+    const app = express();
+    const PORT = process.env.SERVER_PORT || process.env.VITE_SERVER_PORT || 5000;
+    const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:8080";
 
-  // CORS Configuration
-  const corsOptions = {
-    origin: FRONTEND_URL,
-    credentials: true,
-    optionsSuccessStatus: 200,
-  };
+    // CORS Configuration
+    const corsOptions = {
+      origin: FRONTEND_URL,
+      credentials: true,
+      optionsSuccessStatus: 200,
+    };
 
-  // Middleware
-  app.use(cors(corsOptions));
-  app.use(express.json());
+    // Middleware
+    app.use(cors(corsOptions));
+    app.use(express.json());
 
-  // Health check endpoint
-  app.get("/api/health", (req: Request, res: Response) => {
-    res.json({ status: "Server is running", environment: process.env.NODE_ENV || "development" });
-  });
+    // Health check endpoint
+    app.get("/api/health", (req: Request, res: Response) => {
+      res.json({ status: "Server is running", environment: process.env.NODE_ENV || "development" });
+    });
 
-  // OTP Endpoints
-  app.post("/api/send-otp", sendOTPEmail);
-  app.post("/api/verify-otp", verifyOTPEmail);
+    // OTP Endpoints
+    app.post("/api/send-otp", sendOTPEmail);
+    app.post("/api/verify-otp", verifyOTPEmail);
 
-  // 404 Handler
-  app.use((req: Request, res: Response) => {
-    res.status(404).json({ error: "Endpoint not found" });
-  });
+    // Contact Message Endpoint
+    app.post("/api/send-contact-message", sendContactMessage);
 
-  // Start server
-  app.listen(PORT, () => {
-    console.log(` Server running on http://localhost:${PORT}`);
-    console.log(` Frontend URL: ${FRONTEND_URL}`);
-    console.log(` Environment: ${process.env.NODE_ENV || "development"}`);
-  });
+    // 404 Handler
+    app.use((req: Request, res: Response) => {
+      res.status(404).json({ error: "Endpoint not found" });
+    });
+
+    // Start server
+    app.listen(PORT, () => {
+      console.log(` Server running on http://localhost:${PORT}`);
+      console.log(` Frontend URL: ${FRONTEND_URL}`);
+      console.log(` Environment: ${process.env.NODE_ENV || "development"}`);
+      
+    });
+  } catch (error) {
+    console.error("Failed to initialize server:", error);
+    process.exit(1);
+  }
 })();
