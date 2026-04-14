@@ -5,13 +5,10 @@ import { generateOTPEmailHTML, generateOTPPlainText } from "../templates/emailTe
 
 // Create nodemailer transporter
 const transporter = nodemailer.createTransport({
-  service: process.env.SMTP_SERVICE,
-  host: process.env.SMTP_HOST,
-  port: parseInt(process.env.SMTP_PORT as string) || 465,
-  secure: true,
+  service: "gmail",
   auth: {
     user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD,
+    pass: process.env.SMTP_PASSWORD, // MUST be app password
   },
 });
 
