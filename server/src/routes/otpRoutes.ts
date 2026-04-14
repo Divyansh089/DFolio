@@ -1,8 +1,7 @@
 import { Request, Response } from "express";
 import nodemailer from "nodemailer";
-import { generateOTP, storeOTP, verifyOTP, deleteOTP } from "../services/otpService";
-import { generateOTPEmailHTML, generateOTPPlainText } from "../templates/emailTemplate";
-
+import { generateOTP, storeOTP, verifyOTP, deleteOTP } from "../services/otpService.js";
+import { generateOTPEmailHTML, generateOTPPlainText } from "../templates/emailTemplate.js";
 
 // Create nodemailer transporter
 const transporter = nodemailer.createTransport({
