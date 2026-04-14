@@ -58,7 +58,10 @@ if (result.error) {
 
     // Start server
     app.listen(PORT, () => {
-      console.log(` Server running on http://localhost:${PORT}`);
+      const serverUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://dfolio.onrender.com'
+        : `http://localhost:${PORT}`;
+      console.log(` Server running on ${serverUrl}`);
       console.log(` Frontend URL: ${FRONTEND_URL}`);
       console.log(` Environment: ${process.env.NODE_ENV || "development"}`);
       
