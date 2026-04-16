@@ -14,7 +14,7 @@ if (process.env.NODE_ENV !== "production") {
 
     const app = express();
     const PORT = process.env.PORT || process.env.SERVER_PORT || 5000;
-    const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:8080";
+    const FRONTEND_URL = (process.env.FRONTEND_URL || "http://localhost:8080").replace(/\/$/, "");
 
     // CORS Configuration
     const corsOptions = {
