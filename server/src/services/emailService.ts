@@ -1,5 +1,3 @@
-import { Resend } from "resend";
-
 export interface EmailOptions {
   to: string;
   subject: string;
@@ -8,8 +6,13 @@ export interface EmailOptions {
   replyTo?: string;
 }
 
+interface BrevoResponse {
+  messageId?: string;
+  message?: string;
+}
+
 /**
- * Sends an email using Resend API
+ * Sends an email using Brevo REST API
  * @param options - Email configuration object
  * @returns Success status and message
  */
@@ -27,15 +30,12 @@ export const sendEmail = async (options: EmailOptions): Promise<{
   });
 
   try {
-    console.log("🔑 [emailService] Checking RESEND_API_KEY...");
-    if (!process.env.RESEND_API_KEY) {
-      throw new Error("RESEND_API_KEY is not configured");
+    console.log("🔑 [emailService] Checking BREVO_API_KEY...");
+    if (!process.env.BREVO_API_KEY) {
+      throw new Error("BREVO_API_KEY is not configured");
     }
-    console.log("✅ [emailService] RESEND_API_KEY found");
+    console.log("✅ [emailService] BREVO_API_KEY found");
 
-    console.log("📝 [emailService] Creating Resend instance...");
-    const resend = new Resend(process.env.RESEND_API_KEY);
-    
     const fromEmail = process.env.SMTP_FROM_EMAIL;
     const fromName = process.env.SMTP_FROM_NAME || "Folio";
 
@@ -45,38 +45,69 @@ export const sendEmail = async (options: EmailOptions): Promise<{
       throw new Error("SMTP_FROM_EMAIL is not configured");
     }
 
-    console.log("🚀 [emailService] Sending email via Resend...");
-    const response = await resend.emails.send({
-      from: `${fromName} <${fromEmail}>`,
-      to: options.to,
+    console.log("🚀 [emailService] Sending email via Brevo...");
+
+    const emailPayload: Record<string, unknown> = {
+      sender: {
+        name: fromName,
+        email: fromEmail,
+      },
+      to: [
+        {
+          email: options.to,
+        },
+      ],
       subject: options.subject,
-      html: options.html,
-      text: options.text,
-      ...(options.replyTo && { replyTo: options.replyTo }),
-    });
+      htmlContent: options.html,
+      textContent: options.text,
+    };
 
-    console.log("📮 [emailService] Resend response:", response);
-
-    if (response.error) {
-      console.error("❌ [emailService] Resend error:", response.error);
-      return {
-        success: false,
-        message: "Failed to send email",
-        error: response.error.message,
+    // Add replyTo if provided
+    if (options.replyTo) {
+      emailPayload.replyTo = {
+        email: options.replyTo,
       };
     }
 
-    console.log("✅ [emailService] Email sent successfully, ID:", response.id);
-    return {
-      success: true,
-      message: "Email sent successfully",
-    };
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        "api-key": process.env.BREVO_API_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(emailPayload),
+    });
+
+    const responseData = (await response.json()) as BrevoResponse;
+    console.log("📮 [emailService] Brevo response:", responseData);
+
+    if (!response.ok) {
+      console.error("❌ [emailService] Brevo error:", responseData);
+      throw new Error(
+        responseData.message || `Brevo API error: ${response.status}`
+      );
+    }
+
+    if (responseData.messageId) {
+      console.log(
+        "✅ [emailService] Email sent successfully, ID:",
+        responseData.messageId
+      );
+      return {
+        success: true,
+        message: "Email sent successfully",
+      };
+    } else {
+      throw new Error("No message ID returned from Brevo");
+    }
   } catch (error) {
     console.error("❌ [emailService] Catch error:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     return {
       success: false,
       message: "Email service error",
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: errorMessage,
     };
   }
 };

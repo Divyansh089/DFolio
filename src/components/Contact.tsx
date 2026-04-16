@@ -229,6 +229,12 @@ const Contact = () => {
         setLocation("");
         setEmail("");
         setIsVerified(false);
+        setIsOTPSent(false);
+        setOtp("");
+        setOtpError("");
+        if (timerRef.current) clearInterval(timerRef.current);
+        setTimeLeft(0);
+        setCanResend(false);
         // Clear success message after 5 seconds
         setTimeout(() => setMessageSuccess(""), 5000);
       } else {
@@ -366,7 +372,7 @@ const Contact = () => {
 
             {/* OTP Input Section */}
             {isOTPSent && !isVerified && (
-              <div className="flex gap-4 items-start">
+              <div className="relative">
                 <input
                   type="text"
                   placeholder="Enter OTP"
@@ -383,13 +389,13 @@ const Contact = () => {
                   }}
                   disabled={isLoadingOTP}
                   maxLength={4}
-                  className={`flex-1 px-4 py-3 rounded-xl border text-center text-lg font-semibold tracking-widest bg-background focus:outline-none transition-all ${
+                  className={`w-full px-4 py-3 rounded-xl border text-center text-lg font-semibold tracking-widest bg-background focus:outline-none focus:ring-2 transition-all ${
                     otpError
                       ? "border-red-500 bg-red-50/50 text-red-700"
-                      : "border-border focus:ring-2 focus:ring-primary/30"
+                      : "border-border focus:ring-primary/30"
                   }`}
                 />
-                <div className="text-right pt-3 min-w-12">
+                <div className="absolute right-4 top-1/2 -translate-y-1/2">
                   {timeLeft > 0 ? (
                     <div className="text-sm font-semibold text-primary">
                       {formatTime(timeLeft)}
