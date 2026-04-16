@@ -49,15 +49,14 @@ if (process.env.NODE_ENV !== "production") {
       const serverUrl = process.env.NODE_ENV === 'production' 
         ? 'https://dfolio.onrender.com'
         : `http://localhost:${PORT}`;
-      console.log("═══════════════════════════════════════════");
-      console.log("✅ Server is running on port", PORT);
-      console.log("🌐 Server URL:", serverUrl);
-      console.log("📱 Frontend URL:", FRONTEND_URL);
-      console.log("🛠️  Environment:", process.env.NODE_ENV || "development");
-      console.log("═══════════════════════════════════════════");
+      console.log(" Server is running on port", PORT);
+      console.log(" Server URL:", serverUrl);
+      console.log(" Frontend URL:", FRONTEND_URL);
+      console.log("  Environment:", process.env.NODE_ENV || "development");
+      
     });
   } catch (error) {
-    console.error("❌ [Server] Failed to initialize server:", error);
+    console.error(" [Server] Failed to initialize server:", error);
     process.exit(1);
   }
 })();
