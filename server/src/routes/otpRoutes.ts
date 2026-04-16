@@ -4,16 +4,11 @@ import { generateOTPEmailHTML, generateOTPPlainText } from "../templates/emailTe
 import { sendEmail } from "../services/emailService.js";
 
 export const sendOTPEmail = async (req: Request, res: Response) => {
-  console.log("📬 [otpRoutes] POST /send-otp called");
-  console.log("📋 [otpRoutes] Request body:", req.body);
-
   try {
     const { email, userName = "Friend" } = req.body;
-    console.log("✉️ [otpRoutes] Extracted email:", email, "userName:", userName);
 
     // Validate email
     if (!email || !email.includes("@")) {
-      console.warn("⚠️ [otpRoutes] Invalid email:", email);
       return res.status(400).json({
         success: false,
         message: "Invalid email address",
@@ -21,36 +16,25 @@ export const sendOTPEmail = async (req: Request, res: Response) => {
     }
 
     // Generate OTP
-    console.log("🎲 [otpRoutes] Generating OTP...");
     const otp = generateOTP(4);
-    console.log("✅ [otpRoutes] OTP generated:", otp);
-
     const expiryTime = parseInt(process.env.OTP_EXPIRY_TIME as string) || 120000;
-    console.log("⏱️ [otpRoutes] Expiry time:", expiryTime, "ms");
 
     // Store OTP
-    console.log("💾 [otpRoutes] Storing OTP...");
     storeOTP(email, otp, expiryTime);
-    console.log("✅ [otpRoutes] OTP stored successfully");
 
     // Email content
-    console.log("📄 [otpRoutes] Generating email content...");
     const htmlContent = generateOTPEmailHTML(userName, otp);
     const plainTextContent = generateOTPPlainText(userName, otp);
-    console.log("✅ [otpRoutes] Email content generated");
 
-    // Send email via Resend
-    console.log("📧 [otpRoutes] Calling sendEmail service...");
+    // Send email via Brevo
     const emailResult = await sendEmail({
       to: email,
       subject: "Email Verification - OTP Code",
       html: htmlContent,
       text: plainTextContent,
     });
-    console.log("📬 [otpRoutes] sendEmail result:", emailResult);
 
     if (!emailResult.success) {
-      console.error("❌ [otpRoutes] Email send failed:", emailResult);
       return res.status(500).json({
         success: false,
         message: "Failed to send OTP",
@@ -58,7 +42,6 @@ export const sendOTPEmail = async (req: Request, res: Response) => {
       });
     }
 
-    console.log("✅ [otpRoutes] OTP email sent successfully to:", email);
     return res.json({
       success: true,
       message: `OTP sent to ${email}. Check your email (also check spam folder).`,
@@ -66,7 +49,7 @@ export const sendOTPEmail = async (req: Request, res: Response) => {
     });
 
   } catch (error) {
-    console.error("❌ [otpRoutes] Catch error:", error);
+    console.error("Error sending OTP:", error);
     return res.status(500).json({
       success: false,
       message: "Failed to send OTP. Please try again.",
