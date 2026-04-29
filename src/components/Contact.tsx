@@ -10,19 +10,71 @@ const Contact = () => {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
+      // Section heading AOS
+      gsap.from(".contact-heading", {
+        y: 40,
+        opacity: 0,
+        duration: 0.7,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: ".contact-heading",
+          start: "top 85%",
+          toggleActions: "play reverse play reverse",
+        },
+      });
+
+      // Form side AOS with reset
       gsap.from(".contact-form", {
         x: -60,
         opacity: 0,
         duration: 0.8,
         ease: "power3.out",
-        scrollTrigger: { trigger: ".contact-form", start: "top 80%" },
+        scrollTrigger: {
+          trigger: ".contact-form",
+          start: "top 80%",
+          toggleActions: "play reverse play reverse",
+        },
       });
+
+      // Image AOS with reset
       gsap.from(".contact-image", {
         x: 60,
         opacity: 0,
         duration: 0.8,
         ease: "power3.out",
-        scrollTrigger: { trigger: ".contact-image", start: "top 80%" },
+        scrollTrigger: {
+          trigger: ".contact-image",
+          start: "top 80%",
+          toggleActions: "play reverse play reverse",
+        },
+      });
+
+      // Contact info items stagger
+      gsap.from(".contact-info-item", {
+        x: -20,
+        opacity: 0,
+        duration: 0.4,
+        stagger: 0.1,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: ".contact-info",
+          start: "top 85%",
+          toggleActions: "play reverse play reverse",
+        },
+      });
+
+      // Form fields stagger
+      gsap.from(".contact-field", {
+        y: 20,
+        opacity: 0,
+        duration: 0.4,
+        stagger: 0.1,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: ".contact-form-fields",
+          start: "top 85%",
+          toggleActions: "play reverse play reverse",
+        },
       });
     }, sectionRef);
     return () => ctx.revert();
@@ -32,45 +84,47 @@ const Contact = () => {
 
   return (
     <section id="contact" ref={sectionRef} className="section-padding bg-secondary/50">
-      <div className="section-container grid lg:grid-cols-2 gap-16 items-center">
+      <div className="section-container grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
         {/* Form side */}
         <div className="contact-form">
-          <span className="section-label">Contact</span>
-          <h2 className="section-heading mb-8">Let's Connect</h2>
+          <div className="contact-heading">
+            <span className="section-label">Contact</span>
+            <h2 className="section-heading mb-6 sm:mb-8">Let's Connect</h2>
+          </div>
 
-          <div className="space-y-3 mb-8">
-            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          <div className="contact-info space-y-2 sm:space-y-3 mb-6 sm:mb-8">
+            <div className="contact-info-item flex items-center gap-3 text-xs sm:text-sm text-muted-foreground">
               <span className="text-primary">📧</span> {contact.email}
             </div>
-            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+            <div className="contact-info-item flex items-center gap-3 text-xs sm:text-sm text-muted-foreground">
               <span className="text-primary">📱</span> {contact.phone}
             </div>
-            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+            <div className="contact-info-item flex items-center gap-3 text-xs sm:text-sm text-muted-foreground">
               <span className="text-primary">📍</span> {contact.location}
             </div>
-            <div className="flex gap-4 mt-2">
-              <a href={contact.github} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">GitHub</a>
-              <a href={contact.linkedin} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline">LinkedIn</a>
+            <div className="contact-info-item flex gap-4 mt-2">
+              <a href={contact.github} target="_blank" rel="noopener noreferrer" className="text-xs sm:text-sm text-primary hover:underline">GitHub</a>
+              <a href={contact.linkedin} target="_blank" rel="noopener noreferrer" className="text-xs sm:text-sm text-primary hover:underline">LinkedIn</a>
             </div>
           </div>
 
-          <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+          <form className="contact-form-fields space-y-3 sm:space-y-4" onSubmit={(e) => e.preventDefault()}>
             <input
               type="text"
               placeholder="Your Name"
-              className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+              className="contact-field w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
             <input
               type="email"
               placeholder="Your Email"
-              className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+              className="contact-field w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
             <textarea
               placeholder="Your Message"
               rows={4}
-              className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
+              className="contact-field w-full px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
             />
-            <button type="submit" className="btn-primary w-full">
+            <button type="submit" className="contact-field btn-primary w-full">
               Send Message
             </button>
           </form>
@@ -81,7 +135,7 @@ const Contact = () => {
           <img
             src="/images/ch-2.png"
             alt="Contact"
-            className="w-72 md:w-96"
+            className="w-48 sm:w-64 md:w-72 lg:w-96"
           />
         </div>
       </div>

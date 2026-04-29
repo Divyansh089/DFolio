@@ -54,6 +54,7 @@
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-body);
+    overflow-x: hidden;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -62,6 +63,7 @@
 
   html {
     scroll-behavior: smooth;
+    overflow-x: hidden;
   }
 }
 
@@ -131,4 +133,72 @@
 @keyframes dotPulse {
   0%, 100% { box-shadow: 0 0 0 4px hsl(234 85% 55% / 0.2); }
   50% { box-shadow: 0 0 0 8px hsl(234 85% 55% / 0.1); }
+}
+
+/* ───────────────────────────────────────────────────────────
+   RESPONSIVE — Mobile-first media queries
+   ─────────────────────────────────────────────────────────── */
+
+/* Extra-small devices (phones, < 480px) */
+@media (max-width: 479px) {
+  .section-container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .section-padding {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+
+  .section-heading {
+    font-size: 1.6rem;
+    line-height: 1.2;
+  }
+
+  .btn-primary,
+  .btn-outline {
+    padding: 0.65rem 1.25rem;
+    font-size: 0.85rem;
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Small devices (phones landscape, 480–767px) */
+@media (min-width: 480px) and (max-width: 767px) {
+  .section-container {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
+  .section-padding {
+    padding-top: 3.5rem;
+    padding-bottom: 3.5rem;
+  }
+
+  .section-heading {
+    font-size: 1.85rem;
+  }
+}
+
+/* Medium devices (tablets, 768–1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .section-container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  .section-padding {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+}
+
+/* ───────────────────────────────────────────────────────────
+   IMAGE RESPONSIVE UTILITIES
+   ─────────────────────────────────────────────────────────── */
+img {
+  max-width: 100%;
+  height: auto;
 }

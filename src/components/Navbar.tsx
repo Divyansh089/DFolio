@@ -30,24 +30,33 @@ const Navbar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Close mobile menu on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (mobileOpen) setMobileOpen(false);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [mobileOpen]);
+
   return (
     <nav
       ref={navRef}
       className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-md border-b border-border"
     >
-      <div className="section-container flex items-center justify-between h-16">
-        <a href="#" className="font-display text-xl font-bold text-primary">
+      <div className="section-container flex items-center justify-between h-14 sm:h-16">
+        <a href="#" className="font-display text-lg sm:text-xl font-bold text-primary">
           {resumeData.hero.name.split(" ")[0]}
           <span className="text-foreground">.</span>
         </a>
 
         {/* Desktop */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-4 lg:gap-8">
           {resumeData.nav.map((link) => (
             <a
               key={link.href}
               href={link.href}
-              className={`text-sm font-medium transition-colors duration-200 ${
+              className={`text-xs lg:text-sm font-medium transition-colors duration-200 ${
                 activeSection === link.href.replace("#", "")
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"
@@ -60,8 +69,9 @@ const Navbar = () => {
 
         {/* Mobile toggle */}
         <button
-          className="md:hidden text-foreground"
+          className="md:hidden text-foreground p-1"
           onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label="Toggle menu"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             {mobileOpen ? (
@@ -73,23 +83,31 @@ const Navbar = () => {
         </button>
       </div>
 
-      {/* Mobile menu */}
-      {mobileOpen && (
-        <div className="md:hidden bg-background border-b border-border pb-4">
-          <div className="section-container flex flex-col gap-3">
+      {/* Mobile menu — animated dropdown */}
+      <div
+        className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
+          mobileOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+        }`}
+      >
+        <div className="bg-background border-b border-border pb-4">
+          <div className="section-container flex flex-col gap-2">
             {resumeData.nav.map((link) => (
               <a
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
-                className="text-sm font-medium text-muted-foreground hover:text-primary py-1"
+                className={`text-sm font-medium py-2 px-3 rounded-lg transition-all duration-200 ${
+                  activeSection === link.href.replace("#", "")
+                    ? "text-primary bg-primary/5"
+                    : "text-muted-foreground hover:text-primary hover:bg-primary/5"
+                }`}
               >
                 {link.label}
               </a>
             ))}
           </div>
         </div>
-      )}
+      </div>
     </nav>
   );
 };

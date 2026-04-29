@@ -3,6 +3,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { resumeData } from "../data/resumeData";
 import { cn } from "../lib/utils";
+import { useIsMobile } from "../hooks/use-mobile";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -24,17 +25,6 @@ const cardAccents: Record<string, { cardBg: string; cardBorder: string; tagBg: s
   "Hyperledger Fabric": { cardBg: "bg-[#f3f0ff]", cardBorder: "border-[#c8c1f7]", tagBg: "bg-[#ece8ff]", tagText: "text-[#4030cc]" },
 };
 
-// ── Carousel constants ────────────────────────────────────────────────────
-// CARD_W is the fixed pixel width of every card.
-// The track is wider (TRACK_W) so side-cards have space to slide into.
-// Side cards spread SPREAD px per step — must be less than CARD_W so they
-// stay behind the active card yet visibly peek out on each side.
-const CARD_W  = 520;   // px  — active card width
-const CARD_H  = 300;   // px  — card height
-const TRACK_W = 780;   // px  — stage width  (CARD_W + 2 × visible-peek margin)
-const SPREAD  = 130;   // px  — how far each step shifts left/right
-const DEPTH   = 80;    // px  — Z recession per step
-
 const Skills = () => {
   const sectionRef  = useRef<HTMLDivElement>(null);
   const headerRef   = useRef<HTMLDivElement>(null);
@@ -45,21 +35,46 @@ const Skills = () => {
   const autoRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const skills = resumeData.skills;
   const total  = skills.length;
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (!sectionRef.current) return;
     const ctx = gsap.context(() => {
+      // Header AOS
       gsap.from(headerRef.current, {
         y: 30, opacity: 0, duration: 0.7, ease: "power3.out",
-        scrollTrigger: { trigger: sectionRef.current, start: "top 85%" },
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 85%",
+          toggleActions: "play reverse play reverse",
+        },
       });
+      // Avatar AOS
       gsap.from(avatarRef.current, {
         x: 40, opacity: 0, duration: 0.9, delay: 0.2, ease: "power3.out",
-        scrollTrigger: { trigger: sectionRef.current, start: "top 85%" },
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 85%",
+          toggleActions: "play reverse play reverse",
+        },
       });
+      // Carousel AOS
       gsap.from(carouselRef.current, {
         x: -30, opacity: 0, duration: 0.8, delay: 0.1, ease: "power3.out",
-        scrollTrigger: { trigger: sectionRef.current, start: "top 85%" },
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 85%",
+          toggleActions: "play reverse play reverse",
+        },
+      });
+      // Dot indicators AOS
+      gsap.from(".skill-dots", {
+        y: 20, opacity: 0, duration: 0.5, delay: 0.3, ease: "power3.out",
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top 80%",
+          toggleActions: "play reverse play reverse",
+        },
       });
     }, sectionRef);
     return () => ctx.revert();
@@ -85,6 +100,12 @@ const Skills = () => {
     resetTimer();
   };
 
+  // Responsive carousel dimensions
+  const CARD_W  = isMobile ? Math.min(window.innerWidth - 48, 340) : 520;
+  const CARD_H  = isMobile ? 260 : 300;
+  const TRACK_W = isMobile ? Math.min(window.innerWidth - 32, 380) : 780;
+  const SPREAD  = isMobile ? 70 : 130;
+  const DEPTH   = isMobile ? 50 : 80;
 
   const getCardStyle = (idx: number): React.CSSProperties => {
     let offset = idx - current;
@@ -103,8 +124,7 @@ const Skills = () => {
       };
     }
 
-    // Centre of track — cards start at left:0 and are nudged to centre
-    const centreOffset = (TRACK_W - CARD_W) / 2;   // 130px
+    const centreOffset = (TRACK_W - CARD_W) / 2;
     const tx      = centreOffset + offset * SPREAD;
     const tz      = -(abs * DEPTH);
     const ry      = offset * 10;
@@ -127,24 +147,18 @@ const Skills = () => {
     >
       <div className="section-container">
 
-        <div className="grid min-h-[560px] grid-cols-[7fr_3fr] items-start gap-0">
+        <div className="grid min-h-0 lg:min-h-[560px] grid-cols-1 lg:grid-cols-[7fr_3fr] items-start gap-6 lg:gap-0">
 
           {/* ── LEFT ──────────────────────────────────────────────────── */}
           <div ref={carouselRef} className="flex flex-col pt-2">
 
-            <div ref={headerRef} className="mb-[26px]">
+            <div ref={headerRef} className="mb-4 lg:mb-[26px] text-center lg:text-left">
               <span className="section-label font-semibold">Skills</span>
               <h2 className="section-heading mb-0">My Technical Toolkit</h2>
             </div>
 
-            {/*
-              Perspective wrapper — overflow:visible so peeking cards aren't clipped.
-              The inner track has a fixed pixel width & height.
-              Cards are positioned absolute from left:0 inside the track,
-              then shifted right by centreOffset so the active card sits
-              in the middle of the track.
-            */}
-            <div className="overflow-visible [perspective:1000px]">
+            {/* Carousel */}
+            <div className="overflow-visible [perspective:1000px] flex justify-center lg:justify-start">
               <div
                 className="relative overflow-visible [transform-style:preserve-3d]"
                 style={{ width: TRACK_W, height: CARD_H + 20 }}
@@ -158,9 +172,8 @@ const Skills = () => {
                     <div
                       key={skill.name}
                       className={cn(
-                        // Fixed size — NOT inset-0
                         "absolute top-0 left-0 flex flex-col justify-between",
-                        "overflow-hidden rounded-[20px] border p-[26px_24px]",
+                        "overflow-hidden rounded-[20px] border p-4 sm:p-[26px_24px]",
                         "transition-[transform,opacity] duration-[520ms]",
                         "[transition-timing-function:cubic-bezier(0.4,0,0.2,1)]",
                         isActive ? "cursor-default" : "cursor-pointer",
@@ -176,26 +189,26 @@ const Skills = () => {
                     >
                       {art && (
                         <div className="pointer-events-none absolute -bottom-1 -right-1 select-none">
-                          <img src={art} alt="" className="h-[110px] w-[110px]" draggable={false} />
+                          <img src={art} alt="" className="h-[70px] w-[70px] sm:h-[110px] sm:w-[110px]" draggable={false} />
                         </div>
                       )}
 
                       <div className="relative z-[1]">
-                        <div className="mb-1.5 text-[28px] leading-none">{skill.icon}</div>
-                        <h3 className="m-0 text-[17px] font-bold text-[#1a1a2e] [font-family:var(--font-display,inherit)]">
+                        <div className="mb-1.5 text-[22px] sm:text-[28px] leading-none">{skill.icon}</div>
+                        <h3 className="m-0 text-[14px] sm:text-[17px] font-bold text-[#1a1a2e] [font-family:var(--font-display,inherit)]">
                           {skill.name}
                         </h3>
-                        <p className="mt-[5px] max-w-[75%] text-xs leading-[1.5] text-[#555570]">
+                        <p className="mt-[5px] max-w-[75%] text-[10px] sm:text-xs leading-[1.5] text-[#555570]">
                           {skill.description}
                         </p>
                       </div>
 
-                      <div className="relative z-[1] flex flex-wrap gap-1.5">
+                      <div className="relative z-[1] flex flex-wrap gap-1 sm:gap-1.5">
                         {skill.tags.map((tag: string) => (
                           <span
                             key={tag}
                             className={cn(
-                              "rounded-full border px-[10px] py-[3px] text-[11px] font-medium",
+                              "rounded-full border px-2 py-[2px] sm:px-[10px] sm:py-[3px] text-[9px] sm:text-[11px] font-medium",
                               accent.cardBorder,
                               accent.tagBg,
                               accent.tagText,
@@ -212,7 +225,7 @@ const Skills = () => {
             </div>
 
             {/* dot indicators */}
-            <div className="mt-6 flex w-full items-center justify-center gap-[7px]">
+            <div className="skill-dots mt-4 sm:mt-6 flex w-full items-center justify-center gap-[7px]">
               {skills.map((_, i) => (
                 <button
                   key={i}
@@ -230,7 +243,7 @@ const Skills = () => {
           {/* ── RIGHT: avatar ─────────────────────────────────────────── */}
           <div
             ref={avatarRef}
-            className="flex h-full min-h-[480px] items-end justify-end"
+            className="hidden lg:flex h-full min-h-[480px] items-end justify-end"
           >
             <img
               src="/images/ch-3.png"

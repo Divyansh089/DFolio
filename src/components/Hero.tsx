@@ -1,8 +1,11 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { resumeData } from "../data/resumeData";
 import useBlockchainAnimation from "../hooks/useBlockchainAnimation";
 import { useTypingAnimation } from "../hooks/useTypingAnimation";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const Hero = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -50,18 +53,18 @@ const Hero = () => {
       <div className="absolute top-20 right-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-20 left-10 w-96 h-96 bg-primary/3 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="section-container relative z-10 grid lg:grid-cols-2 gap-12 items-center">
+      <div className="section-container relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center py-8 md:py-0">
         {/* Left */}
-        <div>
-          <div className="hero-tag flex items-center gap-2 mb-4">
-            <div className="w-8 h-0.5 bg-primary" />
-            <span className="text-sm font-semibold uppercase tracking-[0.2em] text-primary flex items-center">
+        <div className="order-2 lg:order-1 text-center lg:text-left">
+          <div className="hero-tag flex items-center gap-2 mb-4 justify-center lg:justify-start">
+            <div className="w-8 h-0.5 bg-primary hidden sm:block" />
+            <span className="text-xs sm:text-sm font-semibold uppercase tracking-[0.15em] sm:tracking-[0.2em] text-primary flex items-center">
               {displayText}
               <span className={`ml-0.5 inline-block w-2 h-5 bg-primary transition-opacity duration-100 ${showCursor ? "opacity-100" : "opacity-0"}`} style={{ animation: showCursor ? "none" : "none" }} />
             </span>
           </div>
 
-          <h1 className="hero-name text-5xl md:text-6xl lg:text-7xl font-bold text-foreground leading-[1.1] mb-6 font-display">
+          <h1 className="hero-name text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-foreground leading-[1.1] mb-4 sm:mb-6 font-display">
             Hi, I'm{" "}
             <span className="text-primary relative">
               {hero.name.split(" ")[0]}
@@ -70,16 +73,16 @@ const Hero = () => {
               </svg>
             </span>
             <br />
-            <span className="text-muted-foreground text-4xl md:text-5xl lg:text-6xl">
+            <span className="text-muted-foreground text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl">
               {hero.name.split(" ")[1]}
             </span>
           </h1>
 
-          <p className="hero-subtitle text-lg text-muted-foreground max-w-lg mb-8 leading-relaxed">
+          <p className="hero-subtitle text-sm sm:text-base lg:text-lg text-muted-foreground max-w-lg mb-6 sm:mb-8 leading-relaxed mx-auto lg:mx-0">
             {hero.subtitle}
           </p>
 
-          <div className="hero-buttons flex flex-wrap gap-4 mb-8">
+          <div className="hero-buttons flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 mb-6 sm:mb-8 justify-center lg:justify-start">
             <a href="#projects" className="btn-primary group">
               View Projects
               <svg className="w-4 h-4 ml-1 inline-block group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -89,7 +92,7 @@ const Hero = () => {
             <a href="#contact" className="btn-outline">Contact Me</a>
           </div>
 
-          <div className="hero-socials flex gap-4 items-center">
+          <div className="hero-socials flex gap-4 items-center justify-center lg:justify-start">
             {hero.socials.map((s) => (
               <a
                 key={s.platform}
@@ -105,31 +108,31 @@ const Hero = () => {
                 )}
               </a>
             ))}
-            <span className="text-xs text-muted-foreground/50 ml-2 font-mono">// find me online</span>
+            <span className="text-xs text-muted-foreground/50 ml-2 font-mono hidden sm:inline">// find me online</span>
           </div>
         </div>
 
         {/* Right */}
-        <div className="hero-image flex justify-center lg:justify-end items-start">
-          <div className="relative -mt-12">
+        <div className="hero-image flex justify-center lg:justify-end items-center order-1 lg:order-2">
+          <div className="relative">
             <img
               src="/images/avatar.png"
               alt={hero.name}
-              className="relative w-80 h-80 md:w-96 md:h-96 rounded-full object-cover border-4 border-background shadow-2xl"
+              className="relative w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 lg:w-96 lg:h-96 rounded-full object-cover border-4 border-background shadow-2xl"
               style={{ boxShadow: "var(--shadow-accent)" }}
             />
             {/* Status badge */}
-            <div className="absolute bottom-4 right-4 bg-card border border-border rounded-full px-3 py-1.5 flex items-center gap-2 shadow-lg">
+            <div className="absolute bottom-2 right-2 sm:bottom-4 sm:right-4 bg-card border border-border rounded-full px-2 py-1 sm:px-3 sm:py-1.5 flex items-center gap-1.5 sm:gap-2 shadow-lg">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-xs font-medium text-foreground">Available</span>
+              <span className="text-[10px] sm:text-xs font-medium text-foreground">Available</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Scroll hint */}
-      <div className="hero-scroll-hint absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
-        <span className="text-xs text-muted-foreground/50 font-mono">scroll</span>
+      <div className="hero-scroll-hint absolute bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2">
+        <span className="text-[10px] sm:text-xs text-muted-foreground/50 font-mono">scroll</span>
         <div className="w-5 h-8 rounded-full border-2 border-muted-foreground/20 flex justify-center pt-1.5">
           <div className="w-1 h-2 rounded-full bg-primary animate-bounce" />
         </div>

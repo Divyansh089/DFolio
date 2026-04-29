@@ -30,7 +30,8 @@ export const useScrollAnimation = (
             scrollTrigger: {
               trigger,
               start,
-              toggleActions: "play none none none",
+              // Reset: play on scroll-down, reverse on scroll-up
+              toggleActions: "play reverse play reverse",
             },
           });
         } else {
@@ -41,7 +42,8 @@ export const useScrollAnimation = (
               scrollTrigger: {
                 trigger: el,
                 start,
-                toggleActions: "play none none none",
+                // Reset: play on scroll-down, reverse on scroll-up
+                toggleActions: "play reverse play reverse",
               },
             });
           });
