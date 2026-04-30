@@ -11,19 +11,72 @@ const About = () => {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
+      // AOS with reset for image
       gsap.from(".about-image", {
         x: -80,
         opacity: 0,
         duration: 0.8,
         ease: "power3.out",
-        scrollTrigger: { trigger: ".about-image", start: "top 80%" },
+        scrollTrigger: {
+          trigger: ".about-image",
+          start: "top 80%",
+          toggleActions: "play none none reset",
+        },
       });
+
+      // AOS with reset for text block
       gsap.from(".about-text", {
         x: 80,
         opacity: 0,
         duration: 0.8,
         ease: "power3.out",
-        scrollTrigger: { trigger: ".about-text", start: "top 80%" },
+        scrollTrigger: {
+          trigger: ".about-text",
+          start: "top 80%",
+          toggleActions: "play none none reset",
+        },
+      });
+
+      // AOS with reset for section heading
+      gsap.from(".about-heading", {
+        y: 30,
+        opacity: 0,
+        duration: 0.6,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: ".about-heading",
+          start: "top 85%",
+          toggleActions: "play none none reset",
+        },
+      });
+
+      // AOS with reset for paragraphs (staggered)
+      gsap.from(".about-paragraph", {
+        y: 25,
+        opacity: 0,
+        duration: 0.5,
+        stagger: 0.15,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: ".about-text",
+          start: "top 75%",
+          toggleActions: "play none none reset",
+        },
+      });
+
+      // AOS with reset for stat cards (staggered)
+      gsap.from(".stat-card", {
+        y: 30,
+        opacity: 0,
+        scale: 0.9,
+        duration: 0.5,
+        stagger: 0.1,
+        ease: "back.out(1.4)",
+        scrollTrigger: {
+          trigger: statsRef.current,
+          start: "top 85%",
+          toggleActions: "play none none reset",
+        },
       });
 
       // Stat counters
@@ -39,7 +92,11 @@ const About = () => {
             duration: 2,
             ease: "power2.out",
             snap: isFloat ? undefined : { innerText: 1 },
-            scrollTrigger: { trigger: el, start: "top 85%" },
+            scrollTrigger: {
+              trigger: el,
+              start: "top 85%",
+              toggleActions: "play none none reset",
+            },
             onUpdate: function () {
               const current = parseFloat(gsap.getProperty(el, "innerText") as string);
               el.textContent = isFloat ? current.toFixed(2) : Math.round(current).toString();
@@ -56,41 +113,43 @@ const About = () => {
 
   return (
     <section id="about" ref={sectionRef} className="section-padding bg-muted/30">
-      <div className="section-container grid lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+      <div className="section-container grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
         {/* Image */}
         <div className="about-image lg:col-span-5 flex justify-center lg:justify-start lg:-ml-8">
-          <div className="relative h-[420px] md:h-[480px] flex items-center">
+          <div className="relative h-[300px] sm:h-[380px] md:h-[420px] lg:h-[480px] flex items-center">
             <div className="absolute -bottom-4 -right-4 w-full h-full rounded-2xl bg-primary/15" />
             <img
               src="/images/ch-8.png"
               alt="About Divyansh"
-              className="relative w-80 md:w-[420px] rounded-2xl object-contain"
+              className="relative w-60 sm:w-72 md:w-80 lg:w-[420px] rounded-2xl object-contain"
             />
           </div>
         </div>
 
         {/* Text */}
         <div className="about-text lg:col-span-7">
-          <span className="section-label font-semibold">About Me</span>
-          <h2 className="section-heading mb-6">
-            Passionate Developer &<br />Blockchain Enthusiast
-          </h2>
+          <div className="about-heading">
+            <span className="section-label font-semibold">About Me</span>
+            <h2 className="section-heading mb-4 sm:mb-6">
+              Passionate Developer &<br className="hidden sm:block" />Blockchain Enthusiast
+            </h2>
+          </div>
           {about.paragraphs.map((p, i) => (
-            <p key={i} className="text-muted-foreground leading-relaxed mb-4">
+            <p key={i} className="about-paragraph text-sm sm:text-base text-muted-foreground leading-relaxed mb-3 sm:mb-4">
               {p}
             </p>
           ))}
 
-          <div ref={statsRef} className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-8">
+          <div ref={statsRef} className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 mt-6 sm:mt-8">
             {about.stats.map((stat) => (
-              <div key={stat.label} className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-primary font-display">
+              <div key={stat.label} className="stat-card text-center p-3 sm:p-4 rounded-xl bg-card border border-border/50">
+                <div className="text-xl sm:text-2xl md:text-3xl font-bold text-primary font-display">
                   <span className="stat-value" data-value={stat.value}>
                     0
                   </span>
                   {stat.suffix && <span>{stat.suffix}</span>}
                 </div>
-                <div className="text-xs text-muted-foreground mt-1">{stat.label}</div>
+                <div className="text-[10px] sm:text-xs text-muted-foreground mt-1">{stat.label}</div>
               </div>
             ))}
           </div>
