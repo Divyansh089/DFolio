@@ -18,13 +18,77 @@ const Certifications = () => {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
+      // AOS for heading
+      gsap.from(".cert-heading", {
+        y: 30,
+        opacity: 0,
+        duration: 0.6,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: ".cert-heading",
+          start: "top 85%",
+          toggleActions: "play none none reset",
+        },
+      });
+
+      // AOS for each cert row (alternating direction)
       document.querySelectorAll(".cert-row").forEach((row, i) => {
         gsap.from(row, {
           x: i % 2 === 0 ? -60 : 60,
           opacity: 0,
           duration: 0.8,
           ease: "power3.out",
-          scrollTrigger: { trigger: row, start: "top 85%" },
+          scrollTrigger: {
+            trigger: row,
+            start: "top 85%",
+            toggleActions: "play none none reset",
+          },
+        });
+      });
+
+      // AOS for organization badges
+      document.querySelectorAll(".cert-org-badge").forEach((badge) => {
+        gsap.from(badge, {
+          scale: 0.8,
+          opacity: 0,
+          duration: 0.4,
+          ease: "back.out(2)",
+          scrollTrigger: {
+            trigger: badge,
+            start: "top 88%",
+            toggleActions: "play none none reset",
+          },
+        });
+      });
+
+      // AOS for cert preview cards (scale in)
+      document.querySelectorAll(".cert-preview").forEach((card) => {
+        gsap.from(card, {
+          scale: 0.9,
+          opacity: 0,
+          duration: 0.6,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: card,
+            start: "top 85%",
+            toggleActions: "play none none reset",
+          },
+        });
+      });
+
+      // AOS for topic tags (staggered per cert)
+      document.querySelectorAll(".cert-topics").forEach((container) => {
+        gsap.from(container.querySelectorAll(".tech-tag"), {
+          y: 10,
+          opacity: 0,
+          duration: 0.3,
+          stagger: 0.05,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: container,
+            start: "top 90%",
+            toggleActions: "play none none reset",
+          },
         });
       });
     }, sectionRef);
@@ -34,15 +98,17 @@ const Certifications = () => {
   return (
     <section id="certifications" ref={sectionRef} className="section-padding bg-muted/30">
       <div className="section-container">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="w-8 h-0.5 bg-primary" />
-          <span className="section-label mb-0">Certifications</span>
+        <div className="cert-heading">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-8 h-0.5 bg-primary" />
+            <span className="section-label mb-0">Certifications</span>
+          </div>
+          <h2 className="section-heading mb-10 sm:mb-16">
+            What I've <span className="text-primary">Earned</span>
+          </h2>
         </div>
-        <h2 className="section-heading mb-16">
-          What I've <span className="text-primary">Earned</span>
-        </h2>
 
-        <div className="space-y-16 max-w-5xl mx-auto">
+        <div className="space-y-10 sm:space-y-16 max-w-5xl mx-auto">
           {resumeData.certifications.map((cert, i) => {
             const isEven = i % 2 !== 0;
             const certificatePdf = certificatePdfMap[cert.name];
@@ -56,30 +122,30 @@ const Certifications = () => {
             const topicDescription = descriptions[cert.name] || cert.topics.join(", ");
 
             return (
-              <div key={cert.name} className={`cert-row grid lg:grid-cols-2 gap-10 items-start`}>
+              <div key={cert.name} className={`cert-row grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-10 items-start`}>
                 <div className={isEven ? "lg:order-2" : ""}>
                   {/* Organization badge */}
-                  <span className="inline-block px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-primary bg-primary/10 rounded-full mb-4">
+                  <span className="cert-org-badge inline-block px-3 sm:px-4 py-1 sm:py-1.5 text-[10px] sm:text-xs font-bold uppercase tracking-widest text-primary bg-primary/10 rounded-full mb-3 sm:mb-4">
                     {cert.organization}
                   </span>
 
                   {/* Cert name */}
-                  <h3 className="text-2xl md:text-3xl font-bold font-display text-foreground mb-2 leading-tight">
+                  <h3 className="text-xl sm:text-2xl md:text-3xl font-bold font-display text-foreground mb-2 leading-tight">
                     {cert.name}
                   </h3>
 
                   {/* Year */}
-                  <p className="text-sm text-muted-foreground mb-4 font-mono">
+                  <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4 font-mono">
                     // {cert.year}
                   </p>
 
                   {/* Description */}
-                  <p className="text-muted-foreground leading-relaxed mb-5">
+                  <p className="text-sm sm:text-base text-muted-foreground leading-relaxed mb-4 sm:mb-5">
                     {topicDescription}
                   </p>
 
                   {/* Topic tags */}
-                  <div className="flex flex-wrap gap-2">
+                  <div className="cert-topics flex flex-wrap gap-1.5 sm:gap-2">
                     {cert.topics.map((t) => (
                       <span key={t} className="tech-tag">{t}</span>
                     ))}
@@ -87,13 +153,13 @@ const Certifications = () => {
                 </div>
 
                 {/* Certificate placeholder card */}
-                <div className={isEven ? "lg:order-1" : ""}>
+                <div className={`cert-preview ${isEven ? "lg:order-1" : ""}`}>
                   {certificatePdf ? (
                     <a
                       href={certificatePdf}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group relative block h-64 overflow-hidden rounded-3xl border border-border bg-card shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/40"
+                      className="group relative block h-48 sm:h-56 md:h-64 overflow-hidden rounded-2xl sm:rounded-3xl border border-border bg-card shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/40"
                     >
                       <iframe
                         src={`${certificatePdf}#toolbar=0&navpanes=0&scrollbar=0`}
@@ -101,14 +167,14 @@ const Certifications = () => {
                         className="pointer-events-none h-full w-full"
                       />
                       <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-card via-card/80 to-transparent px-4 py-3">
-                        <span className="text-xs font-mono uppercase tracking-[0.18em] text-muted-foreground/80 transition-colors duration-300 group-hover:text-primary">
+                        <span className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.18em] text-muted-foreground/80 transition-colors duration-300 group-hover:text-primary">
                           Open Full Certificate
                         </span>
                       </div>
                     </a>
                   ) : (
-                    <div className="rounded-3xl border border-border bg-card h-64 flex flex-col items-center justify-center shadow-sm">
-                      <span className="text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground/50">
+                    <div className="rounded-2xl sm:rounded-3xl border border-border bg-card h-48 sm:h-56 md:h-64 flex flex-col items-center justify-center shadow-sm">
+                      <span className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground/50">
                         Certificate Missing
                       </span>
                     </div>
