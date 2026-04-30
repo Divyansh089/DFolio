@@ -10,14 +10,34 @@ const Experience = () => {
 
   useEffect(() => {
     const ctx = gsap.context(() => {
+      // AOS for heading
+      gsap.from(".exp-heading", {
+        y: 30,
+        opacity: 0,
+        duration: 0.6,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: ".exp-heading",
+          start: "top 85%",
+          toggleActions: "play none none reset",
+        },
+      });
+
+      // Timeline line AOS
       gsap.from(".timeline-line-inner", {
         scaleY: 0,
         transformOrigin: "top",
         duration: 1.5,
         ease: "power2.out",
-        scrollTrigger: { trigger: ".timeline-line", start: "top 80%", end: "bottom 60%", scrub: 1 },
+        scrollTrigger: {
+          trigger: ".timeline-line",
+          start: "top 80%",
+          end: "bottom 60%",
+          scrub: 1,
+        },
       });
 
+      // AOS for each experience card (alternating direction)
       document.querySelectorAll(".exp-card").forEach((card) => {
         const isLeft = card.classList.contains("exp-left");
         gsap.from(card, {
@@ -25,7 +45,58 @@ const Experience = () => {
           opacity: 0,
           duration: 0.8,
           ease: "power3.out",
-          scrollTrigger: { trigger: card, start: "top 80%" },
+          scrollTrigger: {
+            trigger: card,
+            start: "top 80%",
+            toggleActions: "play none none reset",
+          },
+        });
+      });
+
+      // AOS for timeline dots
+      document.querySelectorAll(".timeline-dot").forEach((dot) => {
+        gsap.from(dot, {
+          scale: 0,
+          opacity: 0,
+          duration: 0.4,
+          ease: "back.out(3)",
+          scrollTrigger: {
+            trigger: dot,
+            start: "top 85%",
+            toggleActions: "play none none reset",
+          },
+        });
+      });
+
+      // AOS for bullet items (staggered per card)
+      document.querySelectorAll(".exp-bullets").forEach((ul) => {
+        gsap.from(ul.querySelectorAll("li"), {
+          x: -15,
+          opacity: 0,
+          duration: 0.3,
+          stagger: 0.08,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: ul,
+            start: "top 88%",
+            toggleActions: "play none none reset",
+          },
+        });
+      });
+
+      // AOS for certificate section
+      document.querySelectorAll(".exp-certificate").forEach((cert) => {
+        gsap.from(cert, {
+          y: 30,
+          opacity: 0,
+          scale: 0.95,
+          duration: 0.7,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: cert,
+            start: "top 82%",
+            toggleActions: "play none none reset",
+          },
         });
       });
     }, sectionRef);
@@ -35,13 +106,13 @@ const Experience = () => {
   return (
     <section id="experience" ref={sectionRef} className="section-padding">
       <div className="section-container">
-        <div className="text-center mb-16">
+        <div className="exp-heading text-center mb-10 sm:mb-16">
           <span className="section-label">Experience</span>
           <h2 className="section-heading">Professional Journey</h2>
         </div>
 
         <div className="relative max-w-4xl mx-auto">
-          {/* Timeline line */}
+          {/* Timeline line — hidden on mobile */}
           <div className="timeline-line absolute left-1/2 -translate-x-px top-0 bottom-0 w-0.5 bg-border hidden lg:block">
             <div className="timeline-line-inner absolute inset-0 bg-primary" />
           </div>
@@ -51,23 +122,29 @@ const Experience = () => {
             const isInternship = exp.role.toLowerCase().includes("intern");
             
             return (
-              <div key={i} className={`relative mb-12 ${isInternship ? "lg:grid lg:grid-cols-2 lg:gap-12" : "lg:grid lg:grid-cols-2 lg:gap-12"}`}>
-                {/* Dot */}
+              <div key={i} className={`relative mb-8 sm:mb-12 ${isInternship ? "lg:grid lg:grid-cols-2 lg:gap-12" : "lg:grid lg:grid-cols-2 lg:gap-12"}`}>
+                {/* Desktop timeline dot */}
                 <div className="hidden lg:flex absolute left-1/2 -translate-x-1/2 top-6 z-10">
                   <div className="timeline-dot timeline-dot-pulse" />
                 </div>
 
+                {/* Mobile timeline dot + date */}
+                <div className="flex lg:hidden items-center gap-3 mb-3">
+                  <div className="timeline-dot timeline-dot-pulse" />
+                  <span className="text-xs sm:text-sm text-primary font-medium font-mono">{exp.dateRange}</span>
+                </div>
+
                 <div className={`exp-card ${isLeft ? "exp-left lg:pr-12 lg:text-right" : "exp-right lg:col-start-2 lg:pl-12"}`}>
                   <div className="card-elevated">
-                    <span className="text-sm text-primary font-medium">{exp.dateRange}</span>
-                    <h3 className="text-xl font-bold font-display text-foreground mt-1">{exp.role}</h3>
-                    <p className="text-sm text-muted-foreground mb-3">
+                    <span className="hidden lg:inline text-sm text-primary font-medium">{exp.dateRange}</span>
+                    <h3 className="text-lg sm:text-xl font-bold font-display text-foreground mt-1">{exp.role}</h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground mb-3">
                       {exp.company} · {exp.location}
                     </p>
-                    <ul className={`space-y-2 ${isLeft ? "lg:text-right" : ""}`}>
+                    <ul className={`exp-bullets space-y-1.5 sm:space-y-2 ${isLeft ? "lg:text-right" : ""}`}>
                       {exp.bullets.map((b, j) => (
-                        <li key={j} className="text-sm text-muted-foreground flex items-start gap-2">
-                          <span className="text-primary mt-1 shrink-0">▸</span>
+                        <li key={j} className="text-xs sm:text-sm text-muted-foreground flex items-start gap-2">
+                          <span className="text-primary mt-0.5 sm:mt-1 shrink-0">▸</span>
                           <span>{b}</span>
                         </li>
                       ))}
@@ -77,12 +154,12 @@ const Experience = () => {
 
                 {/* Certificate Display for Internship */}
                 {isInternship && (
-                  <div className={`lg:col-span-1 ${isLeft ? "lg:col-start-2" : "lg:col-start-1"}`}>
+                  <div className={`exp-certificate lg:col-span-1 mt-4 lg:mt-0 ${isLeft ? "lg:col-start-2" : "lg:col-start-1"}`}>
                     <a
                       href="/certificate/CertificateUnifiedMentor.pdf"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="group relative block h-80 overflow-hidden rounded-3xl border border-border bg-card shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/40"
+                      className="group relative block h-52 sm:h-64 md:h-80 overflow-hidden rounded-2xl sm:rounded-3xl border border-border bg-card shadow-sm transition-all duration-300 hover:shadow-md hover:border-primary/40"
                     >
                       <iframe
                         src="/certificate/CertificateUnifiedMentor.pdf#toolbar=0&navpanes=0&scrollbar=0"
@@ -90,7 +167,7 @@ const Experience = () => {
                         className="pointer-events-none h-full w-full"
                       />
                       <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-card via-card/80 to-transparent px-4 py-3">
-                        <span className="text-xs font-mono uppercase tracking-[0.18em] text-muted-foreground/80 transition-colors duration-300 group-hover:text-primary">
+                        <span className="text-[10px] sm:text-xs font-mono uppercase tracking-[0.18em] text-muted-foreground/80 transition-colors duration-300 group-hover:text-primary">
                           Open Full Certificate
                         </span>
                       </div>
