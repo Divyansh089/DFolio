@@ -75,8 +75,28 @@ export const resumeData: ResumeData = {
   ],
 
   projects: [
-    {
+      {
       number: "01",
+      name: "Voltra",
+      description:
+        "Enterprise-grade D2C Consumer Electronics e-commerce platform with RBAC security across 4 roles (Admin, Product Manager, Customer Support, Customer). Features Redis-cached permission middleware, dynamic multi-variant product catalog, automated inventory management, virtual card checkout, and automated staff onboarding with Brevo email notifications.",
+      techStack: [
+        "Next.js",
+        "TypeScript",
+        "Node.js",
+        "Express",
+        "Prisma",
+        "PostgreSQL",
+        "Redis",
+        "Bun",
+        "Docker",
+        "Tailwind CSS"
+      ],
+      repoUrl: "https://github.com/Divyansh089/voltro",
+      liveUrl: "https://voltro.vercel.app",
+    },
+    {
+      number: "02",
       name: "QuickSafe",
       description:
         "Ethereum-based supply chain DApp with real-time tracking, wallet authentication, and tamper-proof shipment records. Gas-optimized smart contracts with 120+ Hardhat tests ensuring secure on-chain execution.",
