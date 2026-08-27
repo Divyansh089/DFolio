@@ -76,11 +76,13 @@ const Projects = () => {
   // Map project images with custom assignments
   const getProjectImage = (index: number): string => {
     const imageMap: { [key: number]: number } = {
-      0: 2,  // Project 1 → pro-2.png
-      1: 1,  // Project 2 → pro-1.png
-      2: 3,  // Project 3 → pro-3.png
+      0: 2,  // Project 1 (Voltra) → pro-2.png
+      1: 1,  // Project 2 (QuickSafe) → pro-1.png
+      2: 8,  // Project 3 (TrustMed) → pro-8.png
+      3: 3,  // Project 4 (PrepPro) → pro-3.png
     };
-    return `/images/pro-${imageMap[index]}.png`;
+    const imgNum = imageMap[index] ?? (index + 1);
+    return `/images/pro-${imgNum}.png`;
   };
 
   return (

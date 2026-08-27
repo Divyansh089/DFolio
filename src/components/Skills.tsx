@@ -4,9 +4,35 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { resumeData } from "../data/resumeData";
 import { cn } from "../lib/utils";
 import { useIsMobile } from "../hooks/use-mobile";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { 
+  ChevronLeft, 
+  ChevronRight, 
+  Link as LinkIcon, 
+  Code2, 
+  Server, 
+  Terminal, 
+  Container, 
+  Boxes, 
+  Coins, 
+  ShieldCheck, 
+  Network 
+} from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
+
+const skillIconMap: Record<string, React.ReactNode> = {
+  Blockchain: <LinkIcon className="h-6 w-6 sm:h-7 sm:w-7 text-[#3d3bdb]" />,
+  Frontend: <Code2 className="h-6 w-6 sm:h-7 sm:w-7 text-[#2952cc]" />,
+  Backend: <Server className="h-6 w-6 sm:h-7 sm:w-7 text-[#3342c9]" />,
+  Languages: <Terminal className="h-6 w-6 sm:h-7 sm:w-7 text-[#4535d4]" />,
+  "DevOps & Tools": <Container className="h-6 w-6 sm:h-7 sm:w-7 text-[#3d3bdb]" />,
+  "DevOps & Cloud": <Container className="h-6 w-6 sm:h-7 sm:w-7 text-[#3d3bdb]" />,
+  "Hyperledger Fabric": <Boxes className="h-6 w-6 sm:h-7 sm:w-7 text-[#4030cc]" />,
+  "Web3 & DeFi": <Coins className="h-6 w-6 sm:h-7 sm:w-7 text-[#4d32d4]" />,
+  "Blockchain Security": <ShieldCheck className="h-6 w-6 sm:h-7 sm:w-7 text-[#1d52d8]" />,
+  "Cloud & Infrastructure": <Network className="h-6 w-6 sm:h-7 sm:w-7 text-[#0275bd]" />,
+  Infrastructure: <Network className="h-6 w-6 sm:h-7 sm:w-7 text-[#0275bd]" />,
+};
 
 const skillArt: Record<string, string> = {
   Blockchain: "/svg/blockchain.svg",
@@ -14,7 +40,12 @@ const skillArt: Record<string, string> = {
   Backend: "/svg/backend.svg",
   Languages: "/svg/languages.svg",
   "DevOps & Tools": "/svg/devops-tools.svg",
+  "DevOps & Cloud": "/svg/devops-tools.svg",
   "Hyperledger Fabric": "/svg/hyperledger-fabric.svg",
+  "Web3 & DeFi": "/svg/web3-defi.svg",
+  "Blockchain Security": "/svg/blockchain-security.svg",
+  "Cloud & Infrastructure": "/svg/cloud-infrastructure.svg",
+  Infrastructure: "/svg/cloud-infrastructure.svg",
 };
 
 const cardAccents: Record<string, { cardBg: string; cardBorder: string; tagBg: string; tagText: string }> = {
@@ -23,7 +54,12 @@ const cardAccents: Record<string, { cardBg: string; cardBorder: string; tagBg: s
   Backend: { cardBg: "bg-[#f2f5ff]", cardBorder: "border-[#c2cbf5]", tagBg: "bg-[#eaedff]", tagText: "text-[#3342c9]" },
   Languages: { cardBg: "bg-[#f7f5ff]", cardBorder: "border-[#cec8f8]", tagBg: "bg-[#efecff]", tagText: "text-[#4535d4]" },
   "DevOps & Tools": { cardBg: "bg-[#f4f2ff]", cardBorder: "border-[#c9c4f6]", tagBg: "bg-[#edeaff]", tagText: "text-[#3d3bdb]" },
+  "DevOps & Cloud": { cardBg: "bg-[#f4f2ff]", cardBorder: "border-[#c9c4f6]", tagBg: "bg-[#edeaff]", tagText: "text-[#3d3bdb]" },
   "Hyperledger Fabric": { cardBg: "bg-[#f3f0ff]", cardBorder: "border-[#c8c1f7]", tagBg: "bg-[#ece8ff]", tagText: "text-[#4030cc]" },
+  "Web3 & DeFi": { cardBg: "bg-[#f5f1ff]", cardBorder: "border-[#cfc4f7]", tagBg: "bg-[#eee6ff]", tagText: "text-[#4d32d4]" },
+  "Blockchain Security": { cardBg: "bg-[#f2f6ff]", cardBorder: "border-[#b8cdfa]", tagBg: "bg-[#e5efff]", tagText: "text-[#1d52d8]" },
+  "Cloud & Infrastructure": { cardBg: "bg-[#f0f8ff]", cardBorder: "border-[#b3dcf8]", tagBg: "bg-[#e1f3fe]", tagText: "text-[#0275bd]" },
+  Infrastructure: { cardBg: "bg-[#f0f8ff]", cardBorder: "border-[#b3dcf8]", tagBg: "bg-[#e1f3fe]", tagText: "text-[#0275bd]" },
 };
 
 const Skills = () => {
@@ -35,6 +71,11 @@ const Skills = () => {
   const trackRef = useRef<HTMLDivElement>(null);
   const [current, setCurrent] = useState(0);
   const [animating, setAnimating] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragX, setDragX] = useState(0);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const dragStartX = useRef(0);
   const autoRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const skills = resumeData.skills;
   const total = skills.length;
@@ -132,12 +173,15 @@ const Skills = () => {
     return () => ctx.revert();
   }, [isMobile]);
 
+  // Pause auto-rotation on hover or drag
   const resetTimer = useCallback(() => {
     if (autoRef.current) clearInterval(autoRef.current);
-    autoRef.current = setInterval(() => {
-      setCurrent(c => (c + 1) % total);
-    }, 2800);
-  }, [total]);
+    if (!isHovered && !isDragging) {
+      autoRef.current = setInterval(() => {
+        setCurrent(c => (c + 1) % total);
+      }, 2800);
+    }
+  }, [total, isHovered, isDragging]);
 
   useEffect(() => {
     resetTimer();
@@ -152,21 +196,69 @@ const Skills = () => {
     resetTimer();
   };
 
+  // Drag handlers for mouse & touch
+  const handleDragStart = (clientX: number) => {
+    setIsDragging(true);
+    dragStartX.current = clientX;
+    setDragX(0);
+  };
+
+  const handleDragMove = (clientX: number) => {
+    if (!isDragging) return;
+    const deltaX = clientX - dragStartX.current;
+    setDragX(deltaX);
+  };
+
+  const handleDragEnd = () => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    const threshold = 40;
+    if (dragX < -threshold) {
+      // Swiped left -> next card
+      goTo(current + 1);
+    } else if (dragX > threshold) {
+      // Swiped right -> previous card
+      goTo(current - 1);
+    }
+    setDragX(0);
+  };
+
+  // Interactive 3D tilt following cursor position
+  const handleMouseMoveCard = (e: React.MouseEvent<HTMLDivElement>, isActive: boolean) => {
+    if (!isActive || isDragging) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left - rect.width / 2;
+    const y = e.clientY - rect.top - rect.height / 2;
+    setTilt({
+      x: -(y / (rect.height / 2)) * 7,
+      y: (x / (rect.width / 2)) * 7,
+    });
+  };
+
+  const handleMouseLeaveCard = () => {
+    setTilt({ x: 0, y: 0 });
+  };
 
   const getCardStyle = (idx: number): React.CSSProperties => {
     let offset = idx - current;
     if (offset > total / 2) offset -= total;
     if (offset < -total / 2) offset += total;
 
+    // Real-time offset while dragging with cursor
+    if (isDragging && dragX !== 0) {
+      const dragShift = dragX / SPREAD;
+      offset += dragShift;
+    }
+
     const abs = Math.abs(offset);
 
-    if (abs > 2) {
+    if (abs > 2.2) {
       return {
         transform: "translateX(0px) translateZ(-400px) scale(0.3)",
         opacity: 0,
         zIndex: 0,
         pointerEvents: "none",
-        transition: "none",
+        transition: isDragging ? "none" : "all 520ms cubic-bezier(0.4, 0, 0.2, 1)",
       };
     }
 
@@ -177,11 +269,15 @@ const Skills = () => {
     const scale = abs === 0 ? 1 : abs === 1 ? 0.85 : 0.70;
     const opacity = abs === 0 ? 1 : abs === 1 ? 0.60 : 0.32;
 
+    const tiltX = (idx === current && !isDragging) ? tilt.x : 0;
+    const tiltY = (idx === current && !isDragging) ? tilt.y : 0;
+
     return {
-      transform: `translateX(${tx}px) translateZ(${tz}px) rotateY(${ry}deg) scale(${scale})`,
+      transform: `translateX(${tx}px) translateZ(${tz}px) rotateX(${tiltX}deg) rotateY(${ry + tiltY}deg) scale(${scale})`,
       opacity,
-      zIndex: 100 - abs,
+      zIndex: 100 - Math.round(abs * 10),
       pointerEvents: "auto",
+      transition: isDragging ? "none" : "transform 520ms cubic-bezier(0.4, 0, 0.2, 1), opacity 520ms cubic-bezier(0.4, 0, 0.2, 1)",
     };
   };
 
@@ -209,9 +305,26 @@ const Skills = () => {
               <h2 className="section-heading mb-0">My Technical Toolkit</h2>
             </div>
 
-            <div ref={trackRef} className="overflow-visible [perspective:1000px]">
+            <div
+              ref={trackRef}
+              className="overflow-visible [perspective:1000px] select-none"
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => {
+                setIsHovered(false);
+                handleDragEnd();
+              }}
+              onMouseDown={(e) => handleDragStart(e.clientX)}
+              onMouseMove={(e) => handleDragMove(e.clientX)}
+              onMouseUp={() => handleDragEnd()}
+              onTouchStart={(e) => handleDragStart(e.touches[0].clientX)}
+              onTouchMove={(e) => handleDragMove(e.touches[0].clientX)}
+              onTouchEnd={() => handleDragEnd()}
+            >
               <div
-                className="relative overflow-visible [transform-style:preserve-3d] mx-auto"
+                className={cn(
+                  "relative overflow-visible [transform-style:preserve-3d] mx-auto",
+                  isDragging ? "cursor-grabbing" : "cursor-grab"
+                )}
                 style={{ width: TRACK_W, height: CARD_H + 20 }}
               >
                 {skills.map((skill, idx) => {
@@ -223,12 +336,10 @@ const Skills = () => {
                     <div
                       key={skill.name}
                       className={cn(
-                        "absolute top-0 left-0 flex flex-col justify-between",
+                        "absolute top-0 left-0 flex flex-col justify-start gap-3 sm:gap-4",
                         "overflow-hidden rounded-[20px] border",
                         isMobile ? "p-4" : "p-[26px_24px]",
-                        "transition-[transform,opacity] duration-[520ms]",
-                        "[transition-timing-function:cubic-bezier(0.4,0,0.2,1)]",
-                        isActive ? "cursor-default" : "cursor-pointer",
+                        isActive ? "" : "cursor-pointer",
                         accent.cardBg,
                         accent.cardBorder,
                       )}
@@ -237,7 +348,9 @@ const Skills = () => {
                         width: CARD_W,
                         height: CARD_H,
                       }}
-                      onClick={() => !isActive && goTo(idx)}
+                      onClick={() => !isActive && !isDragging && goTo(idx)}
+                      onMouseMove={(e) => handleMouseMoveCard(e, isActive)}
+                      onMouseLeave={handleMouseLeaveCard}
                     >
                       {art && (
                         <div className="pointer-events-none absolute -bottom-1 -right-1 select-none">
@@ -252,8 +365,10 @@ const Skills = () => {
                         </div>
                       )}
 
-                      <div className="relative z-[1]">
-                        <div className={cn("mb-1.5 leading-none", isMobile ? "text-[22px]" : "text-[28px]")}>{skill.icon}</div>
+                      <div className="relative z-[1] pointer-events-none">
+                        <div className="mb-2 flex items-center">
+                          {skillIconMap[skill.name] ?? <Code2 className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />}
+                        </div>
                         <h3 className={cn(
                           "m-0 font-bold text-[#1a1a2e] [font-family:var(--font-display,inherit)]",
                           isMobile ? "text-[14px]" : "text-[17px]"
@@ -261,14 +376,14 @@ const Skills = () => {
                           {skill.name}
                         </h3>
                         <p className={cn(
-                          "mt-[5px] max-w-[75%] leading-[1.5] text-[#555570]",
+                          "mt-[5px] max-w-[80%] leading-[1.5] text-[#555570]",
                           isMobile ? "text-[10px]" : "text-xs"
                         )}>
                           {skill.description}
                         </p>
                       </div>
 
-                      <div className="relative z-[1] flex flex-wrap gap-1 sm:gap-1.5">
+                      <div className="relative z-[1] flex flex-wrap gap-1 sm:gap-1.5 max-w-[72%] pointer-events-none">
                         {skill.tags.map((tag: string) => (
                           <span
                             key={tag}

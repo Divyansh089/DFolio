@@ -27,7 +27,7 @@ export interface AboutData {
 }
 
 export interface SkillCategory {
-  icon: string;
+  icon?: string;
   name: string;
   description: string;
   tags: string[];
