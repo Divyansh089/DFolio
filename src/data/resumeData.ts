@@ -229,11 +229,24 @@ export const resumeData: ResumeData = {
       number: "04",
       name: "PrepPro",
       description:
-        "Placement preparation platform with test execution, real-time analytics, and interview simulator using WebRTC. Optimized with route-level lazy loading, TanStack Query caching, and Zustand state management.",
-      techStack: ["React", "TypeScript", "Chakra UI", "WebRTC", "PWA"],
+        "AI-powered placement and interview preparation platform built with a 100% GraphQL API layer and real-time WebSockets engine. Features AI mock interview simulations with Google Gemini, live candidate rank broadcasts and active user tracking, Zod schema validation, interactive Monaco code execution with test suite validation, and automated candidate performance analytics.",
+      techStack: [
+        "Next.js",
+        "TypeScript",
+        "Node.js",
+        "Express",
+        "GraphQL",
+        "Apollo Server",
+        "WebSockets",
+        "MongoDB",
+        "Zod",
+        "Gemini AI",
+        "Tailwind CSS"
+      ],
       repoUrl: "https://github.com/Divyansh089/PrepPro",
-      liveUrl: "https://prep-pro-phi.vercel.app",
+      liveUrl: "https://preppro.vercel.app",
     },
+
   ],
 
   experience: [
